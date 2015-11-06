@@ -5528,3 +5528,15 @@ function wp_raise_memory_limit( $context = 'admin' ) {
 
 	return false;
 }
+
+/**
+ * Display an SVG icon from the master SVG sprite.
+ *
+ * @param string $icon  Name of the icon to show.
+ * @param array  $attrs Possible attributes for the SVG element.
+ * @return string SVG code to display the selected icon
+ */
+function wp_icon( $icon, $attrs = array() ) {
+   $sprite_url = '/wp-includes/fonts/dashicons.svg';
+   return sprintf( '<svg class="dashicon"><use xlink:href="%s" /></svg>', esc_url( $sprite_url . '#' . $icon ) );
+}
