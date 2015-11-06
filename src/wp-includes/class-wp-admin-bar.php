@@ -532,6 +532,10 @@ class WP_Admin_Bar {
 				?>><?php
 			endif;
 
+			if ( isset( $node->icon ) && $node->icon ) {
+				echo wp_icon( $node->icon );
+			}
+
 			echo $node->title;
 
 			if ( $has_link ) :
