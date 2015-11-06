@@ -375,6 +375,10 @@ div.wp-menu-image:before {
 	color: rgba(240,245,250,0.6);
 }
 
+#adminmenu use {
+	fill: rgba(240,245,250,0.6);
+}
+
 #adminmenu li.wp-has-current-submenu:hover div.wp-menu-image:before,
 #adminmenu .wp-has-current-submenu div.wp-menu-image:before,
 #adminmenu .current div.wp-menu-image:before,
@@ -385,10 +389,26 @@ div.wp-menu-image:before {
 	color: #fff;
 }
 
+#adminmenu li.wp-has-current-submenu:hover use,
+#adminmenu .wp-has-current-submenu use,
+#adminmenu .current use,
+#adminmenu a.wp-has-current-submenu:hover use,
+#adminmenu a.current:hover use,
+#adminmenu li.wp-has-current-submenu a:focus use,
+#adminmenu li.wp-has-current-submenu.opensub use {
+	fill: #fff;
+}
+
 #adminmenu li:hover div.wp-menu-image:before,
 #adminmenu li a:focus div.wp-menu-image:before,
 #adminmenu li.opensub div.wp-menu-image:before {
 	color: #00b9eb;
+}
+
+#adminmenu li:hover use,
+#adminmenu li a:focus use,
+#adminmenu li.opensub use {
+	fill: #00b9eb;
 }
 
 /* IE8 doesn't redraw the pseudo elements unless you make a change to the content, this restore the initial color after hover */
