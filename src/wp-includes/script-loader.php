@@ -832,24 +832,23 @@ function wp_default_styles( &$styles ) {
 
 	// Common dependencies
 	$styles->add( 'buttons',   "/wp-includes/css/buttons$suffix.css" );
-	$styles->add( 'dashicons', "/wp-includes/css/dashicons$suffix.css" );
 
 	// Includes CSS
-	$styles->add( 'admin-bar',            "/wp-includes/css/admin-bar$suffix.css", array( 'dashicons' ) );
-	$styles->add( 'wp-auth-check',        "/wp-includes/css/wp-auth-check$suffix.css", array( 'dashicons' ) );
-	$styles->add( 'editor-buttons',       "/wp-includes/css/editor$suffix.css", array( 'dashicons' ) );
-	$styles->add( 'media-views',          "/wp-includes/css/media-views$suffix.css", array( 'buttons', 'dashicons', 'wp-mediaelement' ) );
-	$styles->add( 'wp-pointer',           "/wp-includes/css/wp-pointer$suffix.css", array( 'dashicons' ) );
+	$styles->add( 'admin-bar',            "/wp-includes/css/admin-bar$suffix.css", array() );
+	$styles->add( 'wp-auth-check',        "/wp-includes/css/wp-auth-check$suffix.css", array() );
+	$styles->add( 'editor-buttons',       "/wp-includes/css/editor$suffix.css", array() );
+	$styles->add( 'media-views',          "/wp-includes/css/media-views$suffix.css", array( 'buttons', 'wp-mediaelement' ) );
+	$styles->add( 'wp-pointer',           "/wp-includes/css/wp-pointer$suffix.css", array() );
 	$styles->add( 'customize-preview',    "/wp-includes/css/customize-preview$suffix.css" );
 	$styles->add( 'wp-embed-template-ie', "/wp-includes/css/wp-embed-template-ie$suffix.css" );
 	$styles->add_data( 'wp-embed-template-ie', 'conditional', 'lte IE 8' );
 
 	// External libraries and friends
 	$styles->add( 'imgareaselect',       '/wp-includes/js/imgareaselect/imgareaselect.css', array(), '0.9.8' );
-	$styles->add( 'wp-jquery-ui-dialog', "/wp-includes/css/jquery-ui-dialog$suffix.css", array( 'dashicons' ) );
+	$styles->add( 'wp-jquery-ui-dialog', "/wp-includes/css/jquery-ui-dialog$suffix.css", array() );
 	$styles->add( 'mediaelement',        "/wp-includes/js/mediaelement/mediaelementplayer.min.css", array(), '2.22.0' );
-	$styles->add( 'wp-mediaelement',     "/wp-includes/js/mediaelement/wp-mediaelement$suffix.css", array( 'mediaelement' ) );
-	$styles->add( 'thickbox',            '/wp-includes/js/thickbox/thickbox.css', array( 'dashicons' ) );
+	$styles->add( 'wp-mediaelement',     "/wp-includes/js/mediaelement/wp-mediaelement.css", array( 'mediaelement' ) );
+	$styles->add( 'thickbox',            '/wp-includes/js/thickbox/thickbox.css', array() );
 
 	// Deprecated CSS
 	$styles->add( 'deprecated-media', "/wp-admin/css/deprecated-media$suffix.css" );
