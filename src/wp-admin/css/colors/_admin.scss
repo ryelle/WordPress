@@ -116,6 +116,10 @@ input[type=radio]:checked:before {
 	color: $menu-icon;
 }
 
+#adminmenu use {
+	fill: $menu-icon;
+}
+
 #adminmenu a:hover,
 #adminmenu li.menu-top:hover,
 #adminmenu li.opensub > a.menu-top,
@@ -127,6 +131,11 @@ input[type=radio]:checked:before {
 #adminmenu li.menu-top:hover div.wp-menu-image:before,
 #adminmenu li.opensub > a.menu-top div.wp-menu-image:before {
 	color: $menu-highlight-icon;
+}
+
+#adminmenu li.menu-top:hover use,
+#adminmenu li.opensub > a.menu-top use {
+	fill: $menu-highlight-icon;
 }
 
 
@@ -207,6 +216,15 @@ ul#adminmenu > li.current > a.current:after {
 	color: $menu-current-icon;
 }
 
+#adminmenu li.wp-has-current-submenu:hover use,
+#adminmenu .wp-has-current-submenu use,
+#adminmenu .current use,
+#adminmenu a.wp-has-current-submenu:hover use,
+#adminmenu a.current:hover use,
+#adminmenu li.wp-has-current-submenu a:focus use,
+#adminmenu li.wp-has-current-submenu.opensub use {
+	fill: $menu-current-icon;
+}
 
 /* Admin Menu: bubble */
 
