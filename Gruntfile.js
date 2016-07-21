@@ -91,7 +91,8 @@ module.exports = function(grunt) {
 						dest: BUILD_DIR
 					},
 					{
-						src: 'wp-config-sample.php',
+						// src: 'wp-config-sample.php',
+						src: 'wp-config.php',
 						dest: BUILD_DIR
 					}
 				]
@@ -584,9 +585,9 @@ module.exports = function(grunt) {
 			dist: {
 				files: [{
 					expand: true,
-					cwd: SOURCE_DIR + 'wp-includes/fonts/src/',
+					cwd: SOURCE_DIR + 'wp-includes/icons/lib/',
 					src: [ '*.svg' ],
-					dest: SOURCE_DIR + 'wp-includes/fonts/.tmp/',
+					dest: SOURCE_DIR + 'wp-includes/icons/.tmp/',
 					ext: '.svg'
 				}]
 			}
@@ -602,8 +603,8 @@ module.exports = function(grunt) {
 				}
 			},
 			dev: {
-				dest: BUILD_DIR + 'wp-includes/fonts/dashicons.svg',
-				src: [ SOURCE_DIR + 'wp-includes/fonts/.tmp/*.svg' ]
+				dest: BUILD_DIR + 'wp-includes/icons/src/dashicons.svg',
+				src: [ SOURCE_DIR + 'wp-includes/icons/.tmp/*.svg' ]
 			}
 		},
 		imagemin: {
