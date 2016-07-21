@@ -5537,6 +5537,6 @@ function wp_raise_memory_limit( $context = 'admin' ) {
  * @return string SVG code to display the selected icon
  */
 function wp_icon( $icon, $attrs = array() ) {
-   $sprite_url = '/wp-includes/fonts/dashicons.svg';
+   $sprite_url = '/wp-includes/icons/src/dashicons.svg';
    return sprintf( '<svg class="dashicon"><use xlink:href="%s" /></svg>', esc_url( $sprite_url . '#' . $icon ) );
 }
