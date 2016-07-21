@@ -79,7 +79,6 @@ module.exports = function(grunt) {
 							'**',
 							'!wp-includes/js/media/**',
 							'!**/.{svn,git}/**', // Ignore version control directories.
-							'!wp-includes/fonts/src/**', // Ignore SVG source folder
 							// Ignore unminified versions of external libs we don't ship:
 							'!wp-includes/js/backbone.js',
 							'!wp-includes/js/underscore.js',
@@ -91,8 +90,7 @@ module.exports = function(grunt) {
 						dest: BUILD_DIR
 					},
 					{
-						// src: 'wp-config-sample.php',
-						src: 'wp-config.php',
+						src: 'wp-config-sample.php',
 						dest: BUILD_DIR
 					}
 				]
