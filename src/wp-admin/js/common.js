@@ -15,6 +15,11 @@ adminMenu = {
 	favorites : function() {}
 };
 
+function svgIconSwap(target, icon) {
+	var el = $(target);
+	el.attr('xlink:href', '/wp-includes/icons/dashicons.svg#' + icon);
+}
+
 // show/hide/save table columns
 columns = {
 	init : function() {
@@ -116,15 +121,19 @@ screenMeta = {
 	},
 
 	toggleEvent: function() {
-		var panel = $( '#' + $( this ).attr( 'aria-controls' ) );
+		var panel    = $( '#' + $( this ).attr( 'aria-controls' ) ),
+				dashicon = '#show-settings-link .dashicon use';
 
 		if ( !panel.length )
 			return;
 
-		if ( panel.is(':visible') )
+		if ( panel.is(':visible') ) {
 			screenMeta.close( panel, $(this) );
-		else
+			svgIconSwap(dashicon, 'dashicons-arrow-down');
+		} else {
 			screenMeta.open( panel, $(this) );
+			svgIconSwap(dashicon, 'dashicons-arrow-up');
+		}
 	},
 
 	open: function( panel, button ) {
