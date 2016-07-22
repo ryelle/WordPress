@@ -122,7 +122,7 @@ screenMeta = {
 
 	toggleEvent: function() {
 		var panel    = $( '#' + $( this ).attr( 'aria-controls' ) ),
-				dashicon = '#show-settings-link .dashicon use';
+				dashicon = '.dashicon use';
 
 		if ( !panel.length )
 			return;
