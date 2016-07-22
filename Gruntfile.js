@@ -79,7 +79,7 @@ module.exports = function(grunt) {
 							'**',
 							'!wp-includes/js/media/**',
 							'!**/.{svn,git}/**', // Ignore version control directories.
-							'!wp-includes/fonts/src/**', // Ignore SVG source folder
+							'!wp-includes/icons/src/**', // Ignore SVG source folder
 							// Ignore unminified versions of external libs we don't ship:
 							'!wp-includes/js/backbone.js',
 							'!wp-includes/js/underscore.js',
@@ -584,9 +584,9 @@ module.exports = function(grunt) {
 			dist: {
 				files: [{
 					expand: true,
-					cwd: SOURCE_DIR + 'wp-includes/fonts/src/',
+					cwd: SOURCE_DIR + 'wp-includes/icons/src/',
 					src: [ '*.svg' ],
-					dest: SOURCE_DIR + 'wp-includes/fonts/.tmp/',
+					dest: SOURCE_DIR + 'wp-includes/icons/.tmp/',
 					ext: '.svg'
 				}]
 			}
@@ -602,8 +602,8 @@ module.exports = function(grunt) {
 				}
 			},
 			dev: {
-				dest: BUILD_DIR + 'wp-includes/fonts/dashicons.svg',
-				src: [ SOURCE_DIR + 'wp-includes/fonts/.tmp/*.svg' ]
+				dest: BUILD_DIR + 'wp-includes/icons/dashicons.svg',
+				src: [ SOURCE_DIR + 'wp-includes/icons/.tmp/*.svg' ]
 			}
 		},
 		imagemin: {
