@@ -825,6 +825,7 @@ function wp_default_styles( &$styles ) {
 
 	// Common dependencies
 	$styles->add( 'buttons',   "/wp-includes/css/buttons$suffix.css" );
+	$styles->add( 'dashicons', "/wp-includes/css/dashicons$suffix.css" );
 
 	// Includes CSS
 	$styles->add( 'admin-bar',            "/wp-includes/css/admin-bar$suffix.css", array() );
