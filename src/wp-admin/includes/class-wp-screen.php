@@ -890,7 +890,12 @@ final class WP_Screen {
 		<?php endif;
 		if ( $this->show_screen_options() ) : ?>
 			<div id="screen-options-link-wrap" class="hide-if-no-js screen-meta-toggle">
-			<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false"><?php _e( 'Screen Options' ); ?></button>
+				<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false">
+					<?php _e( 'Screen Options' ); ?>
+					<svg class="dashicon" aria-hidden="true">
+		  			<use xlink:href="/wp-includes/icons/dashicons.svg#dashicons-arrow-down"></use>
+					</svg>
+				</button>
 			</div>
 		<?php endif; ?>
 		</div>
