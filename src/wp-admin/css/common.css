@@ -716,7 +716,8 @@ img.emoji {
 /* Dashicon SVG base styles */
 svg.dashicon {
 	width: 20px;
-	height: 100%;
+	/*height: 100%;*/
+	height: 20px;
 }
 
 /*------------------------------------------------------------------------------
@@ -764,7 +765,6 @@ svg.dashicon {
 }
 
 /* @todo can we combine these into a class or use an existing dashicon one? */
-.welcome-panel .welcome-panel-close:before,
 .tagchecklist span a:before,
 #bulk-titles div a:before,
 .notice-dismiss:before {
@@ -781,17 +781,11 @@ svg.dashicon {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.welcome-panel .welcome-panel-close:before {
-	margin: 0;
-}
-
 .tagchecklist span a:before,
 #bulk-titles div a:before {
 	margin: 1px 0;
 }
 
-.welcome-panel .welcome-panel-close:hover:before,
-.welcome-panel .welcome-panel-close:focus:before,
 .tagchecklist span a:hover:before,
 #bulk-titles div a:hover:before {
 	color: #c00;
