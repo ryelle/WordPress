@@ -1,5 +1,12 @@
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
 var showNotice, adminMenu, columns, validateForm, screenMeta;
+
+// so we have global access with other scripts
+function svgIconSwap( target, icon ) {
+	var el = jQuery( target );
+	el.attr( 'xlink:href', '/wp-includes/icons/dashicons.svg#' + icon );
+}
+
 ( function( $, window, undefined ) {
 	var $document = $( document ),
 		$window = $( window ),
@@ -14,11 +21,6 @@ adminMenu = {
 	toggle : function() {},
 	favorites : function() {}
 };
-
-function svgIconSwap(target, icon) {
-	var el = $(target);
-	el.attr('xlink:href', '/wp-includes/icons/dashicons.svg#' + icon);
-}
 
 // show/hide/save table columns
 columns = {
