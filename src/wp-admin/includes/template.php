@@ -1037,7 +1037,7 @@ function do_meta_boxes( $screen, $context, $object ) {
 
 						echo '<button type="button" class="handlediv button-link" aria-expanded="true">';
 						echo '<span class="screen-reader-text">' . sprintf( __( 'Toggle panel: %s' ), $widget_title ) . '</span>';
-						echo '<span class="toggle-indicator" aria-hidden="true"></span>';
+						echo wp_icon( 'dashicons-arrow-down' );
 						echo '</button>';
 					}
 					echo "<h2 class='hndle'><span>{$box['title']}</span></h2>\n";
