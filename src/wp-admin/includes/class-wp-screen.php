@@ -887,9 +887,7 @@ final class WP_Screen {
 			<div id="contextual-help-link-wrap" class="hide-if-no-js screen-meta-toggle">
 				<button type="button" id="contextual-help-link" class="button show-settings" aria-controls="contextual-help-wrap" aria-expanded="false">
 					<?php _e( 'Help' ); ?>
-					<svg class="dashicon" aria-hidden="true">
-		  			<use xlink:href="/wp-includes/icons/dashicons.svg#dashicons-arrow-down"></use>
-					</svg>
+					<?php _e( wp_icon( 'dashicons-arrow-down' ) ); ?>
 				</button>
 			</div>
 		<?php endif;
@@ -897,9 +895,7 @@ final class WP_Screen {
 			<div id="screen-options-link-wrap" class="hide-if-no-js screen-meta-toggle">
 				<button type="button" id="show-settings-link" class="button show-settings" aria-controls="screen-options-wrap" aria-expanded="false">
 					<?php _e( 'Screen Options' ); ?>
-					<svg class="dashicon" aria-hidden="true">
-		  			<use xlink:href="/wp-includes/icons/dashicons.svg#dashicons-arrow-down"></use>
-					</svg>
+					<?php _e( wp_icon( 'dashicons-arrow-down' ) ); ?>
 				</button>
 			</div>
 		<?php endif; ?>
