@@ -2078,9 +2078,9 @@ function wp_star_rating( $args = array() ) {
 
 	$output = '<div class="star-rating">';
 	$output .= '<span class="screen-reader-text">' . $title . '</span>';
-	$output .= str_repeat( '<div class="star star-full" aria-hidden="true"></div>', $full_stars );
-	$output .= str_repeat( '<div class="star star-half" aria-hidden="true"></div>', $half_stars );
-	$output .= str_repeat( '<div class="star star-empty" aria-hidden="true"></div>', $empty_stars );
+	$output .= str_repeat( wp_icon( 'dashicons-star-filled' ), $full_stars );
+	$output .= str_repeat( wp_icon( 'dashicons-star-half' ), $half_stars );
+	$output .= str_repeat( wp_icon( 'dashicons-star-empty' ), $empty_stars );
 	$output .= '</div>';
 
 	if ( $r['echo'] ) {
