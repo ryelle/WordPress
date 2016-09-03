@@ -7,10 +7,11 @@ var postboxes;
 
 	postboxes = {
 		handle_click : function () {
-			var $el = $( this ),
-				p = $el.parent( '.postbox' ),
-				id = p.attr( 'id' ),
-				ariaExpandedValue;
+			var $el     = $( this ),
+					p       = $el.parent( '.postbox' ),
+					id      = p.attr( 'id' ),
+					pIcon = $el.closest( '.postbox' ).find( '.handlediv .dashicon use' ),
+					ariaExpandedValue;
 
 			if ( 'dashboard_browser_nag' === id ) {
 				return;
@@ -23,10 +24,12 @@ var postboxes;
 			if ( $el.hasClass( 'handlediv' ) ) {
 				// The handle button was clicked.
 				$el.attr( 'aria-expanded', ariaExpandedValue );
+				svgIconSwap( pIcon, ariaExpandedValue ? 'arrow-down' : 'arrow-up' );
 			} else {
 				// The handle heading was clicked.
 				$el.closest( '.postbox' ).find( 'button.handlediv' )
 					.attr( 'aria-expanded', ariaExpandedValue );
+				svgIconSwap( pIcon, ariaExpandedValue ? 'arrow-down' : 'arrow-up' );
 			}
 
 			if ( postboxes.page !== 'press-this' ) {
@@ -35,6 +38,7 @@ var postboxes;
 
 			if ( id ) {
 				if ( !p.hasClass('closed') && $.isFunction( postboxes.pbshow ) ) {
+					// postbox panel is opening
 					postboxes.pbshow( id );
 				} else if ( p.hasClass('closed') && $.isFunction( postboxes.pbhide ) ) {
 					postboxes.pbhide( id );

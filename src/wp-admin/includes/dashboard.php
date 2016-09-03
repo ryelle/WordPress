@@ -262,7 +262,7 @@ function wp_dashboard_right_now() {
 			$text = sprintf( $text, number_format_i18n( $num_posts->publish ) );
 			$post_type_object = get_post_type_object( $post_type );
 			if ( $post_type_object && current_user_can( $post_type_object->cap->edit_posts ) ) {
-				printf( '<li class="%1$s-count"><a href="edit.php?post_type=%1$s">%2$s</a></li>', $post_type, $text );
+				printf( '<li class="%1$s-count"><a href="edit.php?post_type=%1$s">' . wp_icon( 'dashicons-admin-' . $post_type ) . '%2$s</a></li>', $post_type, $text );
 			} else {
 				printf( '<li class="%1$s-count"><span>%2$s</span></li>', $post_type, $text );
 			}
@@ -274,7 +274,12 @@ function wp_dashboard_right_now() {
 	if ( $num_comm && ( $num_comm->approved || $num_comm->moderated ) ) {
 		$text = sprintf( _n( '%s Comment', '%s Comments', $num_comm->approved ), number_format_i18n( $num_comm->approved ) );
 		?>
-		<li class="comment-count"><a href="edit-comments.php"><?php echo $text; ?></a></li>
+		<li class="comment-count">
+			<a href="edit-comments.php">
+				<?php echo wp_icon( 'dashicons-admin-comments' ); ?>
+				<?php echo $text; ?>
+			</a>
+		</li>
 		<?php
 		$moderated_comments_count_i18n = number_format_i18n( $num_comm->moderated );
 		/* translators: Number of comments in moderation */
@@ -1471,31 +1476,40 @@ function wp_welcome_panel() {
 			<li><?php printf( '<a href="%s" class="welcome-icon welcome-add-page">' . __( 'Add additional pages' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
 			<li><?php printf( '<a href="%s" class="welcome-icon welcome-write-blog">' . __( 'Add a blog post' ) . '</a>', admin_url( 'post-new.php' ) ); ?></li>
 		<?php else : ?>
-			<li><?php printf( '<a href="%s" class="welcome-icon welcome-write-blog">' . __( 'Write your first blog post' ) . '</a>', admin_url( 'post-new.php' ) ); ?></li>
-			<li><?php printf( '<a href="%s" class="welcome-icon welcome-add-page">' . __( 'Add an About page' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
+			<li><?php printf( '<a href="%s" class="welcome-icon welcome-write-blog">' . wp_icon( 'dashicons-welcome-write-blog' ) . __( 'Write your first blog post' ) . '</a>', admin_url( 'post-new.php' ) ); ?></li>
+			<li><?php printf( '<a href="%s" class="welcome-icon welcome-add-page">' . wp_icon( 'dashicons-plus' ) . __( 'Add an About page' ) . '</a>', admin_url( 'post-new.php?post_type=page' ) ); ?></li>
 		<?php endif; ?>
-			<li><?php printf( '<a href="%s" class="welcome-icon welcome-view-site">' . __( 'View your site' ) . '</a>', home_url( '/' ) ); ?></li>
+			<li><?php printf( '<a href="%s" class="welcome-icon welcome-view-site">' . wp_icon( 'dashicons-welcome-view-site' ) . __( 'View your site' ) . '</a>', home_url( '/' ) ); ?></li>
 		</ul>
 	</div>
 	<div class="welcome-panel-column welcome-panel-last">
 		<h3><?php _e( 'More Actions' ); ?></h3>
 		<ul>
 		<?php if ( current_theme_supports( 'widgets' ) || current_theme_supports( 'menus' ) ) : ?>
-			<li><div class="welcome-icon welcome-widgets-menus"><?php
-				if ( current_theme_supports( 'widgets' ) && current_theme_supports( 'menus' ) ) {
-					printf( __( 'Manage <a href="%1$s">widgets</a> or <a href="%2$s">menus</a>' ),
-						admin_url( 'widgets.php' ), admin_url( 'nav-menus.php' ) );
-				} elseif ( current_theme_supports( 'widgets' ) ) {
-					echo '<a href="' . admin_url( 'widgets.php' ) . '">' . __( 'Manage widgets' ) . '</a>';
-				} else {
-					echo '<a href="' . admin_url( 'nav-menus.php' ) . '">' . __( 'Manage menus' ) . '</a>';
-				}
-			?></div></li>
+			<li>
+				<div class="welcome-icon welcome-widgets-menus">
+					<?php echo wp_icon( 'dashicons-welcome-widgets-menus' ); ?>
+					<?php
+						if ( current_theme_supports( 'widgets' ) && current_theme_supports( 'menus' ) ) {
+							printf( __( 'Manage <a href="%1$s">widgets</a> or <a href="%2$s">menus</a>' ),
+								admin_url( 'widgets.php' ), admin_url( 'nav-menus.php' ) );
+						} elseif ( current_theme_supports( 'widgets' ) ) {
+							echo '<a href="' . admin_url( 'widgets.php' ) . '">' . __( 'Manage widgets' ) . '</a>';
+						} else {
+							echo '<a href="' . admin_url( 'nav-menus.php' ) . '">' . __( 'Manage menus' ) . '</a>';
+						}
+					?>
+				</div>
+			</li>
 		<?php endif; ?>
 		<?php if ( current_user_can( 'manage_options' ) ) : ?>
-			<li><?php printf( '<a href="%s" class="welcome-icon welcome-comments">' . __( 'Turn comments on or off' ) . '</a>', admin_url( 'options-discussion.php' ) ); ?></li>
+			<li>
+				<?php printf( '<a href="%s" class="welcome-icon welcome-comments">' . wp_icon( 'dashicons-welcome-comments' ) . __( 'Turn comments on or off' ) . '</a>', admin_url( 'options-discussion.php' ) ); ?>
+			</li>
 		<?php endif; ?>
-			<li><?php printf( '<a href="%s" class="welcome-icon welcome-learn-more">' . __( 'Learn more about getting started' ) . '</a>', __( 'https://codex.wordpress.org/First_Steps_With_WordPress' ) ); ?></li>
+			<li>
+				<?php printf( '<a href="%s" class="welcome-icon welcome-learn-more">' . wp_icon( 'dashicons-welcome-learn-more' ) . __( 'Learn more about getting started' ) . '</a>', __( 'https://codex.wordpress.org/First_Steps_With_WordPress' ) ); ?>
+			</li>
 		</ul>
 	</div>
 	</div>
