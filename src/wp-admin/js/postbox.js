@@ -10,7 +10,7 @@ var postboxes;
 			var $el     = $( this ),
 					p       = $el.parent( '.postbox' ),
 					id      = p.attr( 'id' ),
-					pboxico = $el.closest( '.postbox' ).find( '.handlediv .dashicon use' ),
+					pIcon = $el.closest( '.postbox' ).find( '.handlediv .dashicon use' ),
 					ariaExpandedValue;
 
 			if ( 'dashboard_browser_nag' === id ) {
@@ -24,12 +24,12 @@ var postboxes;
 			if ( $el.hasClass( 'handlediv' ) ) {
 				// The handle button was clicked.
 				$el.attr( 'aria-expanded', ariaExpandedValue );
-				svgIconSwap(pboxico, 'dashicons-arrow-up');
+				svgIconSwap( pIcon, ariaExpandedValue ? 'arrow-down' : 'arrow-up' );
 			} else {
 				// The handle heading was clicked.
 				$el.closest( '.postbox' ).find( 'button.handlediv' )
 					.attr( 'aria-expanded', ariaExpandedValue );
-				svgIconSwap(pboxico, 'dashicons-arrow-up');
+				svgIconSwap( pIcon, ariaExpandedValue ? 'arrow-down' : 'arrow-up' );
 			}
 
 			if ( postboxes.page !== 'press-this' ) {
@@ -42,9 +42,6 @@ var postboxes;
 					postboxes.pbshow( id );
 				} else if ( p.hasClass('closed') && $.isFunction( postboxes.pbhide ) ) {
 					postboxes.pbhide( id );
-				} else {
-					// postbox panel is closing
-					svgIconSwap(pboxico, 'dashicons-arrow-down');
 				}
 			}
 

@@ -4,7 +4,7 @@ var showNotice, adminMenu, columns, validateForm, screenMeta;
 // so we have global access with other scripts
 function svgIconSwap( target, icon ) {
 	var el = jQuery( target );
-	el.attr( 'xlink:href', '/wp-includes/icons/dashicons.svg#' + icon );
+	el.attr( 'xlink:href', '/wp-includes/icons/dashicons.svg#dashicons-' + icon );
 }
 
 ( function( $, window, undefined ) {
@@ -131,10 +131,10 @@ screenMeta = {
 
 		if ( panel.is(':visible') ) {
 			screenMeta.close( panel, $(this) );
-			svgIconSwap(dashicon, 'dashicons-arrow-down');
+			svgIconSwap( dashicon, 'arrow-down' );
 		} else {
 			screenMeta.open( panel, $(this) );
-			svgIconSwap(dashicon, 'dashicons-arrow-up');
+			svgIconSwap( dashicon, 'arrow-up' );
 		}
 	},
 
