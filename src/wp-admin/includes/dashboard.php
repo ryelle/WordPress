@@ -276,7 +276,7 @@ function wp_dashboard_right_now() {
 		?>
 		<li class="comment-count">
 			<a href="edit-comments.php">
-				<?php _e( wp_icon( 'dashicons-admin-comments' ) ); ?>
+				<?php echo wp_icon( 'dashicons-admin-comments' ); ?>
 				<?php echo $text; ?>
 			</a>
 		</li>
@@ -1488,7 +1488,7 @@ function wp_welcome_panel() {
 		<?php if ( current_theme_supports( 'widgets' ) || current_theme_supports( 'menus' ) ) : ?>
 			<li>
 				<div class="welcome-icon welcome-widgets-menus">
-					<?php _e( wp_icon( 'dashicons-welcome-widgets-menus' ) ); ?>
+					<?php echo wp_icon( 'dashicons-welcome-widgets-menus' ); ?>
 					<?php
 						if ( current_theme_supports( 'widgets' ) && current_theme_supports( 'menus' ) ) {
 							printf( __( 'Manage <a href="%1$s">widgets</a> or <a href="%2$s">menus</a>' ),
