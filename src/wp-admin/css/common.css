@@ -2388,40 +2388,15 @@ div.star-holder .star-rating {
 .star-rating {
 	white-space: nowrap;
 }
-.star-rating .star {
-	display: inline-block;
-	width: 20px;
-	height: 20px;
-	-webkit-font-smoothing: antialiased;
-	font-size: 20px;
-	line-height: 1;
-	font-family: dashicons;
-	text-decoration: inherit;
-	font-weight: 400;
-	font-style: normal;
+.star-rating .dashicon {
 	vertical-align: top;
-	-webkit-transition: color .1s ease-in 0;
-	transition: color .1s ease-in 0;
-	text-align: center;
-	color: #ffb900;
-}
-
-.star-rating .star-full:before {
-	content: "\f155";
-}
-
-.star-rating .star-half:before {
-	content: "\f459";
+	fill: #ffb900;
 }
 
 .rtl .star-rating .star-half {
 	-webkit-transform: rotateY(180deg);
 	-ms-transform: rotateY(180deg);
 	transform: rotateY(180deg);
-}
-
-.star-rating .star-empty:before {
-	content: "\f154";
 }
 
 div.action-links {
