@@ -563,7 +563,7 @@ function do_enclose( $content, $post_ID ) {
 	global $wpdb;
 
 	//TODO: Tidy this ghetto code up and make the debug code optional
-	include_once( ABSPATH . WPINC . '/class-IXR.php' ); 
+	include_once( ABSPATH . WPINC . '/class-IXR.php' );
 
 	$post_links = array();
 
@@ -5537,6 +5537,16 @@ function wp_raise_memory_limit( $context = 'admin' ) {
  * @return string SVG code to display the selected icon
  */
 function wp_icon( $icon, $attrs = array() ) {
-   $sprite_url = '/wp-includes/icons/dashicons.svg';
-   return sprintf( '<svg class="dashicon"><use xlink:href="%s" /></svg>', esc_url( $sprite_url . '#' . $icon ) );
+	$defaults = array(
+		'title' => false,
+	);
+	$attrs = wp_parse_args( $attrs, $defaults );
+
+	$sprite_url = '/wp-includes/icons/dashicons.svg';
+	return sprintf(
+		'<svg class="dashicon" %1$s>%2$s<use xlink:href="%3$s" /></svg>',
+		$attrs['title'] ? '' : 'aria-hidden="true"',
+		$attrs['title'] ? '<title>' . $attrs['title'] . '</title>' : '',
+		esc_url( $sprite_url . '#' . $icon )
+	);
 }
