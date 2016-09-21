@@ -16,6 +16,7 @@ wp-tests-config.php
 /build
 /tests/phpunit/build
 /wp-cli.local.yml
+/src/wp-includes/icons/.tmp
 
 # Composer-generated files that do not pass the 5.2 linter
 src/wp-vendor/autoload.php

@@ -713,6 +713,13 @@ img.emoji {
 	box-shadow: none !important;
 }
 
+/* Dashicon SVG base styles */
+svg.dashicon {
+	width: 20px;
+	/*height: 100%;*/
+	height: 20px;
+}
+
 /*------------------------------------------------------------------------------
   1.0 - Text Styles
 ------------------------------------------------------------------------------*/
@@ -758,7 +765,6 @@ img.emoji {
 }
 
 /* @todo can we combine these into a class or use an existing dashicon one? */
-.welcome-panel .welcome-panel-close:before,
 .tagchecklist span a:before,
 #bulk-titles div a:before,
 .notice-dismiss:before {
@@ -775,17 +781,11 @@ img.emoji {
 	-moz-osx-font-smoothing: grayscale;
 }
 
-.welcome-panel .welcome-panel-close:before {
-	margin: 0;
-}
-
 .tagchecklist span a:before,
 #bulk-titles div a:before {
 	margin: 1px 0;
 }
 
-.welcome-panel .welcome-panel-close:hover:before,
-.welcome-panel .welcome-panel-close:focus:before,
 .tagchecklist span a:hover:before,
 #bulk-titles div a:hover:before {
 	color: #c00;
@@ -1649,26 +1649,6 @@ form.upgrade .hint {
 	transform: none;
 }
 
-#screen-meta-links .show-settings:after {
-	right: 0;
-	content: "\f140";
-	font: normal 20px/1 dashicons;
-	speak: none;
-	display: inline-block;
-	padding: 0 5px 0 0;
-	bottom: 2px;
-	position: relative;
-	vertical-align: bottom;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-decoration: none !important;
-	color: #72777c;
-}
-
-#screen-meta-links .screen-meta-active:after {
-	content: "\f142";
-}
-
 /* end screen options and help tabs */
 
 .toggle-arrow {
@@ -2408,40 +2388,15 @@ div.star-holder .star-rating {
 .star-rating {
 	white-space: nowrap;
 }
-.star-rating .star {
-	display: inline-block;
-	width: 20px;
-	height: 20px;
-	-webkit-font-smoothing: antialiased;
-	font-size: 20px;
-	line-height: 1;
-	font-family: dashicons;
-	text-decoration: inherit;
-	font-weight: 400;
-	font-style: normal;
+.star-rating .dashicon {
 	vertical-align: top;
-	-webkit-transition: color .1s ease-in 0;
-	transition: color .1s ease-in 0;
-	text-align: center;
-	color: #ffb900;
-}
-
-.star-rating .star-full:before {
-	content: "\f155";
-}
-
-.star-rating .star-half:before {
-	content: "\f459";
+	fill: #ffb900;
 }
 
 .rtl .star-rating .star-half {
 	-webkit-transform: rotateY(180deg);
 	-ms-transform: rotateY(180deg);
 	transform: rotateY(180deg);
-}
-
-.star-rating .star-empty:before {
-	content: "\f154";
 }
 
 div.action-links {

@@ -65,7 +65,8 @@ module.exports = function(grunt) {
 				src: []
 			},
 			tinymce: ['<%= concat.tinymce.dest %>'],
-			qunit: ['tests/qunit/compiled.html']
+			qunit: ['tests/qunit/compiled.html'],
+			svgs: [ SOURCE_DIR + 'wp-includes/fonts/.tmp' ]
 		},
 		copy: {
 			files: {
@@ -78,6 +79,7 @@ module.exports = function(grunt) {
 							'**',
 							'!wp-includes/js/media/**',
 							'!**/.{svn,git}/**', // Ignore version control directories.
+							'!wp-includes/icons/src/**', // Ignore SVG source folder
 							// Ignore unminified versions of external libs we don't ship:
 							'!wp-includes/js/backbone.js',
 							'!wp-includes/js/underscore.js',
@@ -584,6 +586,40 @@ module.exports = function(grunt) {
 				}
 			}
 		},
+		// minifies SVGs
+		svgmin: {
+			options: {
+				plugins: [{
+					removeViewBox: false
+				},{
+					removeUselessStrokeAndFill: false
+				}]
+			},
+			dist: {
+				files: [{
+					expand: true,
+					cwd: SOURCE_DIR + 'wp-includes/icons/src/',
+					src: [ '*.svg' ],
+					dest: SOURCE_DIR + 'wp-includes/icons/.tmp/',
+					ext: '.svg'
+				}]
+			}
+		},
+		svgstore: {
+			options: {
+				prefix: 'dashicons-',
+				cleanup: [ 'fill', 'stroke' ],
+				svg: {
+					xmlns: 'http://www.w3.org/2000/svg',
+					'xmlns:xlink': 'http://www.w3.org/1999/xlink',
+					viewBox: '0 0 20 20'
+				}
+			},
+			dev: {
+				dest: BUILD_DIR + 'wp-includes/icons/dashicons.svg',
+				src: [ SOURCE_DIR + 'wp-includes/icons/.tmp/*.svg' ]
+			}
+		},
 		imagemin: {
 			core: {
 				expand: true,
@@ -655,6 +691,9 @@ module.exports = function(grunt) {
 
 	// Color schemes task.
 	grunt.registerTask('colors', ['sass:colors', 'postcss:colors']);
+
+	// Process SVGs
+	grunt.registerTask('svgs', ['clean:svgs', 'svgmin', 'svgstore']);
 
 	// JSHint task.
 	grunt.registerTask( 'jshint:corejs', [
@@ -791,6 +830,7 @@ module.exports = function(grunt) {
 		'rtl',
 		'cssmin:rtl',
 		'cssmin:colors',
+		'svgs',
 		'uglify:core',
 		'uglify:embed',
 		'uglify:jqueryui',

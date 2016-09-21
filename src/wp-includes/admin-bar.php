@@ -109,7 +109,8 @@ function wp_admin_bar_render() {
 function wp_admin_bar_wp_menu( $wp_admin_bar ) {
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'wp-logo',
-		'title' => '<span class="ab-icon"></span><span class="screen-reader-text">' . __( 'About WordPress' ) . '</span>',
+		'icon'  => 'dashicons-wordpress',
+		'title' => '<span class="screen-reader-text">' . __( 'About WordPress' ) . '</span>',
 		'href'  => self_admin_url( 'about.php' ),
 	) );
 
@@ -167,7 +168,8 @@ function wp_admin_bar_sidebar_toggle( $wp_admin_bar ) {
 	if ( is_admin() ) {
 		$wp_admin_bar->add_menu( array(
 			'id'    => 'menu-toggle',
-			'title' => '<span class="ab-icon"></span><span class="screen-reader-text">' . __( 'Menu' ) . '</span>',
+			'icon'  => 'dashicons-menu',
+			'title' => '<span class="screen-reader-text">' . __( 'Menu' ) . '</span>',
 			'href'  => '#',
 		) );
 	}
@@ -305,6 +307,7 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
 
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'site-name',
+		'icon'  => 'dashicons-admin-home',
 		'title' => $title,
 		'href'  => ( is_admin() || ! current_user_can( 'read' ) ) ? home_url( '/' ) : admin_url(),
 	) );
@@ -361,6 +364,7 @@ function wp_admin_bar_customize_menu( $wp_admin_bar ) {
 
 	$wp_admin_bar->add_menu( array(
 		'id'     => 'customize',
+		'icon'  => 'dashicons-admin-customizer',
 		'title'  => __( 'Customize' ),
 		'href'   => $customize_url,
 		'meta'   => array(
@@ -394,6 +398,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'my-sites',
+		'icon'  => 'dashicons-admin-network',
 		'title' => __( 'My Sites' ),
 		'href'  => $my_sites_url,
 	) );
@@ -663,10 +668,11 @@ function wp_admin_bar_new_content_menu( $wp_admin_bar ) {
 	if ( ! $actions )
 		return;
 
-	$title = '<span class="ab-icon"></span><span class="ab-label">' . _x( 'New', 'admin bar menu group label' ) . '</span>';
+	$title = '<span class="ab-label">' . _x( 'New', 'admin bar menu group label' ) . '</span>';
 
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'new-content',
+		'icon'  => 'dashicons-plus',
 		'title' => $title,
 		'href'  => admin_url( current( array_keys( $actions ) ) ),
 	) );
@@ -698,13 +704,13 @@ function wp_admin_bar_comments_menu( $wp_admin_bar ) {
 	$awaiting_mod = $awaiting_mod->moderated;
 	$awaiting_text = sprintf( _n( '%s comment awaiting moderation', '%s comments awaiting moderation', $awaiting_mod ), number_format_i18n( $awaiting_mod ) );
 
-	$icon  = '<span class="ab-icon"></span>';
 	$title = '<span id="ab-awaiting-mod" class="ab-label awaiting-mod pending-count count-' . $awaiting_mod . '" aria-hidden="true">' . number_format_i18n( $awaiting_mod ) . '</span>';
 	$title .= '<span class="screen-reader-text">' . $awaiting_text . '</span>';
 
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'comments',
-		'title' => $icon . $title,
+		'icon'  => 'dashicons-admin-comments',
+		'title' => $title,
 		'href'  => admin_url('edit-comments.php'),
 	) );
 }
@@ -784,11 +790,12 @@ function wp_admin_bar_updates_menu( $wp_admin_bar ) {
 	if ( !$update_data['counts']['total'] )
 		return;
 
-	$title = '<span class="ab-icon"></span><span class="ab-label">' . number_format_i18n( $update_data['counts']['total'] ) . '</span>';
+	$title = '<span class="ab-label">' . number_format_i18n( $update_data['counts']['total'] ) . '</span>';
 	$title .= '<span class="screen-reader-text">' . $update_data['title'] . '</span>';
 
 	$wp_admin_bar->add_menu( array(
 		'id'    => 'updates',
+		'icon'  => 'dashicons-update',
 		'title' => $title,
 		'href'  => network_admin_url( 'update-core.php' ),
 		'meta'  => array(

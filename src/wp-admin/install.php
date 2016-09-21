@@ -73,7 +73,6 @@ function display_header( $body_classes = '' ) {
 	<title><?php _e( 'WordPress &rsaquo; Installation' ); ?></title>
 	<?php
 		wp_admin_css( 'install', true );
-		wp_admin_css( 'dashicons', true );
 	?>
 </head>
 <body class="wp-core-ui<?php echo $body_classes ?>">

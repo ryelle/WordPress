@@ -1,5 +1,12 @@
 /* global setUserSetting, ajaxurl, commonL10n, alert, confirm, pagenow */
 var showNotice, adminMenu, columns, validateForm, screenMeta;
+
+// so we have global access with other scripts
+function svgIconSwap( target, icon ) {
+	var el = jQuery( target );
+	el.attr( 'xlink:href', '/wp-includes/icons/dashicons.svg#dashicons-' + icon );
+}
+
 ( function( $, window, undefined ) {
 	var $document = $( document ),
 		$window = $( window ),
@@ -116,15 +123,19 @@ screenMeta = {
 	},
 
 	toggleEvent: function() {
-		var panel = $( '#' + $( this ).attr( 'aria-controls' ) );
+		var panel    = $( '#' + $( this ).attr( 'aria-controls' ) ),
+				dashicon = '#screen-meta-links .show-settings .dashicon use';
 
 		if ( !panel.length )
 			return;
 
-		if ( panel.is(':visible') )
+		if ( panel.is(':visible') ) {
 			screenMeta.close( panel, $(this) );
-		else
+			svgIconSwap( dashicon, 'arrow-down' );
+		} else {
 			screenMeta.open( panel, $(this) );
+			svgIconSwap( dashicon, 'arrow-up' );
+		}
 	},
 
 	open: function( panel, button ) {

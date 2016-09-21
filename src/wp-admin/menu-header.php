@@ -124,8 +124,8 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 				$img_style = ' style="background-image:url(\'' . esc_attr( $item[6] ) . '\')"';
 				$img_class = ' svg';
 			} elseif ( 0 === strpos( $item[6], 'dashicons-' ) ) {
-				$img = '<br />';
-				$img_class = ' dashicons-before ' . sanitize_html_class( $item[6] );
+				$img = wp_icon( sanitize_html_class( $item[6] ) );
+				$img_class = '';
 			}
 		}
 		$arrow = '<div class="wp-menu-arrow"><div></div></div>';
@@ -234,7 +234,7 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 		echo "</li>";
 	}
 
-	echo '<li id="collapse-menu" class="hide-if-no-js"><div id="collapse-button"><div></div></div>';
+	echo '<li id="collapse-menu" class="hide-if-no-js"><div class="wp-menu-image">' . wp_icon( 'dashicons-admin-collapse' ) . '</div>';
 	echo '<span>' . esc_html__( 'Collapse menu' ) . '</span>';
 	echo '</li>';
 }
