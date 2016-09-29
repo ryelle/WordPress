@@ -353,6 +353,7 @@ class WP_Customize_Section {
 				<li class="customize-section-description-container">
 					<div class="customize-section-title">
 						<button class="customize-section-back" tabindex="-1">
+							<?php echo wp_icon( 'dashicons-arrow-left-alt2' ); ?>
 							<span class="screen-reader-text"><?php _e( 'Back' ); ?></span>
 						</button>
 						<h3>

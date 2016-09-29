@@ -455,7 +455,9 @@ $new_user_ignore_pass = $creating && isset( $_POST['noconfirmation'] ) ? wp_unsl
 	</tr>
 	<tr>
 		<th scope="row"><?php _e( 'Send User Notification' ) ?></th>
-		<td><label for="send_user_notification"><input type="checkbox" name="send_user_notification" id="send_user_notification" value="1" <?php checked( $new_user_send_notification ); ?> /> <?php _e( 'Send the new user an email about their account.' ); ?></label></td>
+		<td><label for="send_user_notification">
+		<?php echo wp_icon( 'dashicons-yes' ); ?>
+<input type="checkbox" name="send_user_notification" id="send_user_notification" value="1" <?php checked( $new_user_send_notification ); ?> /> <?php _e( 'Send the new user an email about their account.' ); ?></label></td>
 	</tr>
 <?php } // !is_multisite ?>
 	<tr class="form-field">

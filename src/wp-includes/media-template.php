@@ -249,9 +249,12 @@ function wp_print_media_templates() {
 
 	<script type="text/html" id="tmpl-media-library-view-switcher">
 		<a href="<?php echo esc_url( add_query_arg( 'mode', 'list', $_SERVER['REQUEST_URI'] ) ) ?>" class="view-list">
-			<span class="screen-reader-text"><?php _e( 'List View' ); ?></span>
+						<?php echo wp_icon( 'dashicons-list-view' ); ?>
+<span class="screen-reader-text"><?php _e( 'List View' ); ?></span>
 		</a>
 		<a href="<?php echo esc_url( add_query_arg( 'mode', 'grid', $_SERVER['REQUEST_URI'] ) ) ?>" class="view-grid current">
+								<?php echo wp_icon( 'dashicons-grid-view' ); ?>
+
 			<span class="screen-reader-text"><?php _e( 'Grid View' ); ?></span>
 		</a>
 	</script>

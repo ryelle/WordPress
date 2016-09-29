@@ -42,7 +42,8 @@
 						<p class="site-description"><?php echo $description; ?></p>
 					<?php endif;
 				?>
-				<button class="secondary-toggle"><?php _e( 'Menu and widgets', 'twentyfifteen' ); ?></button>
+				<button class="secondary-toggle"><?php echo wp_icon( 'dashicons-menu' ); ?>
+<?php _e( 'Menu and widgets', 'twentyfifteen' ); ?></button>
 			</div><!-- .site-branding -->
 		</header><!-- .site-header -->
 

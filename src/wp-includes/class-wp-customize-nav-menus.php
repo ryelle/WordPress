@@ -868,6 +868,8 @@ final class WP_Customize_Nav_Menus {
 		<div id="available-menu-items" class="accordion-container">
 			<div class="customize-section-title">
 				<button type="button" class="customize-section-back" tabindex="-1">
+							<?php echo wp_icon( 'dashicons-arrow-left-alt2' ); ?>
+
 					<span class="screen-reader-text"><?php _e( 'Back' ); ?></span>
 				</button>
 				<h3>
