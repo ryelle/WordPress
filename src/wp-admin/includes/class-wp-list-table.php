@@ -625,7 +625,7 @@ class WP_List_Table {
 				if ( $current_mode === $mode )
 					$classes[] = 'current';
 				printf(
-					"<a href='%s' class='%s' id='view-switch-$mode'><span class='screen-reader-text'>%s</span></a>\n",
+-					"<a href='%s' class='%s' id='view-switch-$mode'><span class='screen-reader-text'>%s</span></a>\n",
 					esc_url( add_query_arg( 'mode', $mode ) ),
 					implode( ' ', $classes ),
 					$title

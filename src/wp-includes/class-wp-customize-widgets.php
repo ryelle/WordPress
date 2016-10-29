@@ -765,6 +765,7 @@ final class WP_Customize_Widgets {
 		<div id="available-widgets">
 			<div class="customize-section-title">
 				<button class="customize-section-back" tabindex="-1">
+					<?php echo wp_icon( 'dashicons-arrow-left-alt' ); ?>
 					<span class="screen-reader-text"><?php _e( 'Back' ); ?></span>
 				</button>
 				<h3>

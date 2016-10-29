@@ -718,6 +718,7 @@ svg.dashicon {
 	width: 20px;
 	/*height: 100%;*/
 	height: 20px;
+	vertical-align:bottom;
 }
 
 /*------------------------------------------------------------------------------
@@ -764,22 +765,6 @@ svg.dashicon {
 	display: none;
 }
 
-/* @todo can we combine these into a class or use an existing dashicon one? */
-.tagchecklist span a:before,
-#bulk-titles div a:before,
-.notice-dismiss:before {
-	background: none;
-	color: #b4b9be;
-	content: "\f153";
-	display: block;
-	font: normal 16px/20px dashicons;
-	speak: none;
-	height: 20px;
-	text-align: center;
-	width: 20px;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
 
 .tagchecklist span a:before,
 #bulk-titles div a:before {

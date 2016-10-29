@@ -264,6 +264,7 @@ if ( !( IS_PROFILE_PAGE && !$user_can_edit ) ) : ?>
 <th scope="row"><?php _e( 'Toolbar' ); ?></th>
 <td><fieldset><legend class="screen-reader-text"><span><?php _e('Toolbar') ?></span></legend>
 <label for="admin_bar_front">
+<?php echo wp_icon( 'dashicons-yes' ); ?>
 <input name="admin_bar_front" type="checkbox" id="admin_bar_front" value="1"<?php checked( _get_admin_bar_pref( 'front', $profileuser->ID ) ); ?> />
 <?php _e( 'Show Toolbar when viewing site' ); ?></label><br />
 </fieldset>
