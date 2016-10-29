@@ -308,9 +308,7 @@ function attachment_submit_meta_box( $post ) {
 	$stamp = __('Uploaded on: <b>%1$s</b>');
 	$date = date_i18n( $datef, strtotime( $post->post_date ) );
 	?>
-	<div class="misc-pub-section curtime misc-pub-curtime">
-		<span id="timestamp"><?php echo wp_icon( 'dashicons-calendar' ); ?>
-		<?php printf($stamp, $date); ?></span>
+	<div class="misc-pub-section curtime misc-pub-curtime"><span id="timestamp"><?php echo wp_icon( 'dashicons-calendar' ); ?><?php printf($stamp, $date); ?></span>
 	</div><!-- .misc-pub-section -->
 
 	<?php
@@ -388,7 +386,7 @@ function post_format_meta_box( $post, $box ) {
 			<?php foreach ( $post_formats[0] as $format ) : ?>
 				<br />
 				<input type="radio" name="post_format" class="post-format" id="post-format-<?php echo esc_attr( $format ); ?>" value="<?php echo esc_attr( $format ); ?>" <?php checked( $post_format, $format ); ?> />
-				<?php echo wp_icon( 'dashicons-format-<?php echo strtolower(get_post_format_string( $format )); ?>' ); ?>
+				<?php echo wp_icon( 'dashicons-format-' . echo strtolower(get_post_format_string( $format )) . ''); ?>
 				<label for="post-format-<?php echo esc_attr( $format ); ?>" class="post-format-icon"><?php echo esc_html( get_post_format_string( $format ) ); ?></label>
 			<?php endforeach; ?> 
 		</fieldset>

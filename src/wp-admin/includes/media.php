@@ -561,7 +561,7 @@ function media_buttons($editor_id = 'content') {
 	$img = '<span class="wp-media-buttons-icon"></span> ';
 
 	$id_attribute = $instance === 1 ? ' id="insert-media-button"' : '';
-	printf( '<button type="button"%s class="button insert-media add_media" data-editor="%s"><?php echo wp_icon( 'dashicons-admin-media' ); ?>%s</button>',
+	printf( '<button type="button"%s class="button insert-media add_media" data-editor="%s">' .  wp_icon( 'dashicons-admin-media' ) .'%s</button>',
 		$id_attribute,
 		esc_attr( $editor_id ),
 		$img . __( 'Add Media' )

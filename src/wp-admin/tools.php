@@ -52,7 +52,7 @@ require_once( ABSPATH . 'wp-admin/admin-header.php' );
 									<?php echo wp_icon( 'dashicons-pressthis' ); ?>
 									<span><?php _e( 'Press This' ); ?></span></a>
 			<button type="button" class="button button-secondary pressthis-js-toggle js-show-pressthis-code-wrap" aria-expanded="false" aria-controls="pressthis-code-wrap">
-						<?php echo wp_icon( 'dashicons-clipboard' ); ?>
+				<?php echo wp_icon( 'dashicons-clipboard' ); ?>
 				<span class="screen-reader-text"><?php _e( 'Copy &#8220;Press This&#8221; bookmarklet code' ) ?></span>
 			</button>
 		</p>
