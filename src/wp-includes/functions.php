@@ -5544,7 +5544,7 @@ function wp_icon( $icon, $attrs = array() ) {
 
 	$sprite_url = '/wp-includes/icons/dashicons.svg';
 	return sprintf(
-		'<svg class="dashicon" %1$s>%2$s<use xlink:href="%3$s" /></svg>',
+		'<svg class="dashicon" %1$s>%2$s <use xlink:href="%3$s" /> </svg>',
 		$attrs['title'] ? '' : 'aria-hidden="true"',
 		$attrs['title'] ? '<title>' . $attrs['title'] . '</title>' : '',
 		esc_url( $sprite_url . '#' . $icon )
