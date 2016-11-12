@@ -74,7 +74,11 @@ do_action( 'post_submitbox_minor_actions', $post );
 
 <div id="misc-publishing-actions">
 
-<div class="misc-pub-section misc-pub-post-status"><label for="post_status"><?php _e('Status:') ?></label>
+<div class="misc-pub-section misc-pub-post-status">
+<label for="post_status">
+<?php echo wp_icon( 'dashicons-post-status' ); ?>
+<?php _e('Status:') ?></label>
+
 <span id="post-status-display">
 <?php
 switch ( $post->post_status ) {
