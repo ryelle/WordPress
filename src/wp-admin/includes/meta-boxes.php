@@ -74,7 +74,12 @@ do_action( 'post_submitbox_minor_actions', $post );
 
 <div id="misc-publishing-actions">
 
-<div class="misc-pub-section misc-pub-post-status"><label for="post_status"><?php _e('Status:') ?></label>
+<div class="misc-pub-section misc-pub-post-status">
+<label for="post_status">
+	<?php echo wp_icon( 'dashicons-post-status' ); ?>
+	<?php _e('Status:') ?>
+</label>
+
 <span id="post-status-display">
 <?php
 switch ( $post->post_status ) {
@@ -125,6 +130,7 @@ switch ( $post->post_status ) {
 </div><!-- .misc-pub-section -->
 
 <div class="misc-pub-section misc-pub-visibility" id="visibility">
+<?php echo wp_icon( 'dashicons-visibility' ); ?>
 <?php _e('Visibility:'); ?> <span id="post-visibility-display"><?php
 
 if ( 'private' == $post->post_status ) {
@@ -200,6 +206,7 @@ if ( ! empty( $args['args']['revisions_count'] ) ) : ?>
 if ( $can_publish ) : // Contributors don't get to choose the date of publish ?>
 <div class="misc-pub-section curtime misc-pub-curtime">
 	<span id="timestamp">
+	<?php echo wp_icon( 'dashicons-calendar' ); ?>
 	<?php printf($stamp, $date); ?></span>
 	<a href="#edit_timestamp" class="edit-timestamp hide-if-no-js"><span aria-hidden="true"><?php _e( 'Edit' ); ?></span> <span class="screen-reader-text"><?php _e( 'Edit date and time' ); ?></span></a>
 	<fieldset id="timestampdiv" class="hide-if-js">
@@ -374,9 +381,18 @@ function post_format_meta_box( $post, $box ) {
 	<div id="post-formats-select">
 		<fieldset>
 			<legend class="screen-reader-text"><?php _e( 'Post Formats' ); ?></legend>
-			<input type="radio" name="post_format" class="post-format" id="post-format-0" value="0" <?php checked( $post_format, '0' ); ?> /> <label for="post-format-0" class="post-format-icon post-format-standard"><?php echo get_post_format_string( 'standard' ); ?></label>
+			<input type="radio" name="post_format" class="post-format" id="post-format-0" value="0" <?php checked( $post_format, '0' ); ?> />
+			<label for="post-format-0" class="post-format-icon post-format-standard">
+				<?php echo wp_icon( 'dashicons-admin-post' ); ?>
+				<?php echo get_post_format_string( 'standard' ); ?>
+			</label>
 			<?php foreach ( $post_formats[0] as $format ) : ?>
-			<br /><input type="radio" name="post_format" class="post-format" id="post-format-<?php echo esc_attr( $format ); ?>" value="<?php echo esc_attr( $format ); ?>" <?php checked( $post_format, $format ); ?> /> <label for="post-format-<?php echo esc_attr( $format ); ?>" class="post-format-icon post-format-<?php echo esc_attr( $format ); ?>"><?php echo esc_html( get_post_format_string( $format ) ); ?></label>
+			<br />
+ 			<input type="radio" name="post_format" class="post-format" id="post-format-<?php echo esc_attr( $format ); ?>" value="<?php echo esc_attr( $format ); ?>" <?php checked( $post_format, $format ); ?> />
+			<label for="post-format-<?php echo esc_attr( $format ); ?>" class="post-format-icon">
+				<?php echo wp_icon( 'dashicons-format-' . $format ); ?>
+				<?php echo esc_html( get_post_format_string( $format ) ); ?>
+			</label>
 			<?php endforeach; ?>
 		</fieldset>
 	</div>
