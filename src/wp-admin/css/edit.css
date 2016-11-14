@@ -464,43 +464,6 @@ form#tags-filter {
 	height: auto !important;
 }
 
-#misc-publishing-actions label[for="post_status"]:before,
-#post-body #visibility:before,
-.curtime #timestamp:before,
-#post-body .misc-pub-revisions:before,
-span.wp-media-buttons-icon:before {
-	color: #82878c;
-}
-
-#post-body #visibility:before,
-.curtime #timestamp:before,
-#post-body .misc-pub-revisions:before {
-	font: normal 20px/1 dashicons;
-	speak: none;
-	display: inline-block;
-	padding: 0 2px 0 0;
-	top: 0;
-	left: -1px;
-	position: relative;
-	vertical-align: top;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-	text-decoration: none !important;
-}
-
-#post-body #visibility:before {
-	content: "\f177";
-}
-
-.curtime #timestamp:before {
-	content: "\f145";
-	top: -1px;
-}
-
-#post-body .misc-pub-revisions:before {
-	content: "\f321";
-}
-
 #timestampdiv {
 	padding-top: 5px;
 	line-height: 23px;
