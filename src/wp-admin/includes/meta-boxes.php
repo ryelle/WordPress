@@ -76,8 +76,9 @@ do_action( 'post_submitbox_minor_actions', $post );
 
 <div class="misc-pub-section misc-pub-post-status">
 <label for="post_status">
-<?php echo wp_icon( 'dashicons-post-status' ); ?>
-<?php _e('Status:') ?></label>
+	<?php echo wp_icon( 'dashicons-post-status' ); ?>
+	<?php _e('Status:') ?>
+</label>
 
 <span id="post-status-display">
 <?php
@@ -381,13 +382,17 @@ function post_format_meta_box( $post, $box ) {
 		<fieldset>
 			<legend class="screen-reader-text"><?php _e( 'Post Formats' ); ?></legend>
 			<input type="radio" name="post_format" class="post-format" id="post-format-0" value="0" <?php checked( $post_format, '0' ); ?> />
-			<?php echo wp_icon( 'dashicons-admin-post' ); ?>
-			<label for="post-format-0" class="post-format-icon post-format-standard"><?php echo get_post_format_string( 'standard' ); ?></label>
+			<label for="post-format-0" class="post-format-icon post-format-standard">
+				<?php echo wp_icon( 'dashicons-admin-post' ); ?>
+				<?php echo get_post_format_string( 'standard' ); ?>
+			</label>
 			<?php foreach ( $post_formats[0] as $format ) : ?>
 			<br />
  			<input type="radio" name="post_format" class="post-format" id="post-format-<?php echo esc_attr( $format ); ?>" value="<?php echo esc_attr( $format ); ?>" <?php checked( $post_format, $format ); ?> />
-			<?php echo wp_icon( 'dashicons-format-' . strtolower(get_post_format_string( $format )) . '' ); ?>
-			<label for="post-format-<?php echo esc_attr( $format ); ?>" class="post-format-icon"><?php echo esc_html( get_post_format_string( $format ) ); ?></label>
+			<label for="post-format-<?php echo esc_attr( $format ); ?>" class="post-format-icon">
+				<?php echo wp_icon( 'dashicons-format-' . $format ); ?>
+				<?php echo esc_html( get_post_format_string( $format ) ); ?>
+			</label>
 			<?php endforeach; ?>
 		</fieldset>
 	</div>
