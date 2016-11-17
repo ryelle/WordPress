@@ -789,35 +789,17 @@ classes exist in paginate_links() but not seen in list table output. */
 	text-decoration: none;
 }
 
-.view-switch a:before {
-	color: #b4b9be;
-	display: inline-block;
-	font: normal 20px/1 dashicons;
-	speak: none;
-	vertical-align: middle;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+.view-switch a {
+	fill: #b4b9be;
 }
 
-.view-switch a:hover:before,
-.view-switch a:focus:before {
-	color: #727272;
+.view-switch a:hover,
+.view-switch a:focus {
+	fill: #727272;
 }
 
-.view-switch a.current:before {
-	color: #0073aa;
-}
-
-.view-switch .view-list:before {
-	content: "\f163";
-}
-
-.view-switch .view-excerpt:before {
-	content: "\f164";
-}
-
-.view-switch .view-grid:before {
-	content: "\f509";
+.view-switch a.current {
+	fill: #0073aa;
 }
 
 .filter {
