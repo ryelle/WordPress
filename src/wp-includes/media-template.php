@@ -163,7 +163,7 @@ function wp_print_media_templates() {
 
 	<script type="text/html" id="tmpl-media-modal">
 		<div class="<?php echo $class; ?>">
-			<button type="button" class="button-link media-modal-close"><span class="media-modal-icon"><span class="screen-reader-text"><?php _e( 'Close media panel' ); ?></span></span></button>
+			<button type="button" class="button-link media-modal-close"><?php echo wp_icon( 'dashicons-no-alt', array( 'title' => __( 'Close media panel' ) ) ); ?></button>
 			<div class="media-modal-content"></div>
 		</div>
 		<div class="media-modal-backdrop"></div>
@@ -280,8 +280,8 @@ function wp_print_media_templates() {
 
 	<script type="text/html" id="tmpl-edit-attachment-frame">
 		<div class="edit-media-header">
-			<button class="left dashicons <# if ( ! data.hasPrevious ) { #> disabled <# } #>"><span class="screen-reader-text"><?php _e( 'Edit previous media item' ); ?></span></button>
-			<button class="right dashicons <# if ( ! data.hasNext ) { #> disabled <# } #>"><span class="screen-reader-text"><?php _e( 'Edit next media item' ); ?></span></button>
+			<button class="left dashicons <# if ( ! data.hasPrevious ) { #> disabled <# } #>"><?php echo wp_icon( 'dashicons-arrow-left-alt2', array( 'title' => __( 'Edit previous media item' ) ) ); ?></button>
+			<button class="right dashicons <# if ( ! data.hasNext ) { #> disabled <# } #>"><?php echo wp_icon( 'dashicons-arrow-right-alt2', array( 'title' => __( 'Edit next media item' ) ) ); ?></button>
 		</div>
 		<div class="media-frame-title"></div>
 		<div class="media-frame-content"></div>
