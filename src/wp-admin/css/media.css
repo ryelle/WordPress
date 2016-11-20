@@ -334,7 +334,6 @@
 	speak: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	content: "\f158";
 }
 
 .find-box-buttons {
@@ -645,10 +644,11 @@ border color while dragging a file over the uploader drop area */
 	overflow: hidden;
 }
 
+
 .upload-php .media-modal-close .media-modal-icon:before {
-	content: "\f335";
 	font-size: 22px;
 }
+
 
 .upload-php .media-modal-close,
 .edit-attachment-frame .edit-media-header .left,
@@ -709,16 +709,6 @@ border color while dragging a file over the uploader drop area */
 .upload-php .media-modal-close:focus .media-modal-icon:before,
 .upload-php .media-modal-close:hover .media-modal-icon:before {
 	color: #000;
-}
-
-.edit-attachment-frame .edit-media-header .left:before,
-.rtl .edit-attachment-frame .edit-media-header .right:before {
-	content: "\f341";
-}
-
-.edit-attachment-frame .edit-media-header .right:before,
-.rtl .edit-attachment-frame .edit-media-header .left:before {
-	content: "\f345";
 }
 
 .edit-attachment-frame .edit-media-header .left.disabled,
@@ -983,34 +973,6 @@ border color while dragging a file over the uploader drop area */
 	filter: alpha(opacity=50);
 	opacity: 0.5;
 	cursor: default;
-}
-
-.imgedit-crop:before {
-	content: "\f165";
-}
-
-.imgedit-rleft:before {
-	content: "\f166";
-}
-
-.imgedit-rright:before {
-	content: "\f167";
-}
-
-.imgedit-flipv:before {
-	content: "\f168";
-}
-
-.imgedit-fliph:before {
-	content: "\f169";
-}
-
-.imgedit-undo:before {
-	content: "\f171";
-}
-
-.imgedit-redo:before {
-	content: "\f172";
 }
 
 .imgedit-crop-wrap {
