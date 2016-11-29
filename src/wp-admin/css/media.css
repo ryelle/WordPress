@@ -328,14 +328,6 @@
 		0 0 2px 1px rgba(30, 140, 190, .8);
 }
 
-#find-posts-close:before {
-	font: normal 20px/36px dashicons;
-	vertical-align: top;
-	speak: none;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
-}
-
 .find-box-buttons {
 	padding: 8px 16px;
 	background: #fcfcfc;
@@ -643,12 +635,6 @@ border color while dragging a file over the uploader drop area */
 .edit-attachment-frame .edit-media-header {
 	overflow: hidden;
 }
-
-
-.upload-php .media-modal-close .media-modal-icon:before {
-	font-size: 22px;
-}
-
 
 .upload-php .media-modal-close,
 .edit-attachment-frame .edit-media-header .left,
