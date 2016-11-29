@@ -61,8 +61,8 @@ class Tests_Multisite_MS_Files_Rewriting extends WP_UnitTestCase {
 	 * should change with upload directories.
 	 */
 	function test_upload_directories_after_multiple_wpmu_delete_blog_with_ms_files() {
-		$filename = rand_str().'.jpg';
-		$contents = rand_str();
+		$filename = __FUNCTION__ . '.jpg';
+		$contents = __FUNCTION__ . '_contents';
 
 		// Upload a file to the main site on the network.
 		$file1 = wp_upload_bits( $filename, null, $contents );
@@ -76,14 +76,14 @@ class Tests_Multisite_MS_Files_Rewriting extends WP_UnitTestCase {
 		wpmu_delete_blog( $blog_id, true );
 
 		// The file on the main site should still exist. The file on the deleted site should not.
-		$this->assertTrue( file_exists( $file1['file'] ) );
-		$this->assertFalse( file_exists( $file2['file'] ) );
+		$this->assertFileExists( $file1['file'] );
+		$this->assertFileNotExists( $file2['file'] );
 
 		wpmu_delete_blog( $blog_id, true );
 
 		// The file on the main site should still exist. The file on the deleted site should not.
-		$this->assertTrue( file_exists( $file1['file'] ) );
-		$this->assertFalse( file_exists( $file2['file'] ) );
+		$this->assertFileExists( $file1['file'] );
+		$this->assertFileNotExists( $file2['file'] );
 	}
 }
 

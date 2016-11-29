@@ -60,6 +60,55 @@ class Tests_Query_Search extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @ticket 38099
+	 */
+	function test_disable_search_exclusion_prefix() {
+		$title = '-HYPHENATION_TEST';
+
+		// Create a post with a title which starts with a hyphen
+		$post_id = self::factory()->post->create( array(
+			'post_content' => $title, 'post_type' => $this->post_type
+		) );
+
+		// By default, we can use the hyphen prefix to exclude results
+		$this->assertEquals( array(), $this->get_search_results( $title ) );
+
+		// After we disable the feature using the filter, we should get the result
+		add_filter( 'wp_query_search_exclusion_prefix', '__return_false' );
+		$result = $this->get_search_results( $title );
+		$post = array_pop( $result );
+		$this->assertEquals( $post->ID, $post_id );
+		remove_filter( 'wp_query_search_exclusion_prefix', '__return_false' );
+	}
+
+	/**
+	 * @ticket 38099
+	 */
+	function test_change_search_exclusion_prefix() {
+		$title = '#OCTOTHORPE_TEST';
+
+		// Create a post with a title that starts with a non-hyphen prefix.
+		$post_id = self::factory()->post->create( array(
+			'post_content' => $title, 'post_type' => $this->post_type
+		) );
+
+		// By default, we should get the result.
+		$result = $this->get_search_results( $title );
+		$post = array_pop( $result );
+		$this->assertEquals( $post->ID, $post_id );
+
+		// After we change the prefix, the result should be excluded.
+		add_filter( 'wp_query_search_exclusion_prefix', array( $this, 'filter_search_exclusion_prefix_octothorpe' ) );
+		$found = $this->get_search_results( $title );
+		remove_filter( 'wp_query_search_exclusion_prefix', array( $this, 'filter_search_exclusion_prefix_octothorpe' ) );
+		$this->assertEquals( array(), $found );
+	}
+
+	function filter_search_exclusion_prefix_octothorpe() {
+		return '#';
+	}
+
+	/**
 	 * @ticket 33988
 	 */
 	public function test_s_should_exclude_term_prefixed_with_dash() {
@@ -278,6 +327,201 @@ class Tests_Query_Search extends WP_UnitTestCase {
 		) );
 
 		$this->assertSame( array( $p1, $p3, $p2 ), $q->posts );
+	}
+
+	/**
+	 * Unfiltered search queries for attachment post types should not inlcude
+	 * filenames to ensure the postmeta JOINs don't happen on the front end.
+	 *
+	 * @ticket 22744
+	 */
+	public function test_exclude_file_names_in_attachment_search_by_default() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image2.png', true );
+
+		// Pass post_type an array value.
+		$q = new WP_Query( array(
+			's'           => 'image2',
+			'fields'      => 'ids',
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+		) );
+
+		$this->assertNotEquals( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_include_file_names_in_attachment_search_as_string() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image1.png', true );
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		// Pass post_type a string value.
+		$q = new WP_Query( array(
+			's'           => 'image1',
+			'fields'      => 'ids',
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+		) );
+
+		$this->assertSame( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_include_file_names_in_attachment_search_as_array() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image2.png', true );
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		// Pass post_type an array value.
+		$q = new WP_Query( array(
+			's'           => 'image2',
+			'fields'      => 'ids',
+			'post_type'   => array( 'attachment' ),
+			'post_status' => 'inherit',
+		) );
+
+		$this->assertSame( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_exclude_attachment_file_names_in_general_searches() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image3.png', true );
+
+		$q = new WP_Query( array(
+			's'           => 'image3',
+			'fields'      => 'ids',
+			'post_type'   => array( 'post', 'page', 'attachment' ),
+			'post_status' => 'inherit',
+		) );
+
+		$this->assertNotEquals( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_include_file_names_in_attachment_search_with_meta_query() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image4.png', true );
+		add_post_meta( $attachment, '_test_meta_key', 'value', true );
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		// Pass post_type a string value.
+		$q = new WP_Query( array(
+			's'           => 'image4',
+			'fields'      => 'ids',
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+			'meta_query'  => array(
+				array(
+					'key'     => '_test_meta_key',
+					'value'   => 'value',
+					'compare' => '=',
+				),
+			),
+		) );
+
+		$this->assertSame( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_include_file_names_in_attachment_search_with_tax_query() {
+		$attachment = self::factory()->post->create( array(
+			'post_type'    => 'attachment',
+			'post_status'  => 'publish',
+			'post_title'   => 'bar foo',
+			'post_content' => 'foo bar',
+			'post_excerpt' => 'This post has foo',
+		) );
+
+		// Add a tag to the post.
+		wp_set_post_terms( $attachment, 'test', 'post_tag' );
+
+		add_post_meta( $attachment, '_wp_attached_file', 'some-image5.png', true );
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		// Pass post_type a string value.
+		$q = new WP_Query( array(
+			's'           => 'image5',
+			'fields'      => 'ids',
+			'post_type'   => 'attachment',
+			'post_status' => 'inherit',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'post_tag',
+					'field'    => 'slug',
+					'terms'    => 'test',
+				),
+			),
+		) );
+
+		$this->assertSame( array( $attachment ), $q->posts );
+	}
+
+	/**
+	 * @ticket 22744
+	 */
+	public function test_filter_query_attachment_filenames_unhooks_itself() {
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		apply_filters( 'posts_clauses', array(
+			'where'    => '',
+			'groupby'  => '',
+			'join'     => '',
+			'orderby'  => '',
+			'distinct' => '',
+			'fields'   => '',
+			'limit'    => '',
+		) );
+
+		$result = has_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+
+		$this->assertFalse( $result );
 	}
 
 	public function filter_posts_search( $sql ) {

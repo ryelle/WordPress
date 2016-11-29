@@ -468,8 +468,8 @@ function wpautop( $pee, $br = true ) {
 
 	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
 
-	// Add a single line break above block-level opening tags.
-	$pee = preg_replace('!(<' . $allblocks . '[\s/>])!', "\n$1", $pee);
+	// Add a double line break above block-level opening tags.
+	$pee = preg_replace('!(<' . $allblocks . '[\s/>])!', "\n\n$1", $pee);
 
 	// Add a double line break below block-level closing tags.
 	$pee = preg_replace('!(</' . $allblocks . '>)!', "$1\n\n", $pee);
@@ -1490,8 +1490,16 @@ function utf8_uri_encode( $utf8_string, $length = 0 ) {
  * | -------- | ----- | ----------- | --------------------------------------- |
  * | U+00B7   | l·l   | ll          | Flown dot (between two Ls)              |
  *
+ * Serbian (`sr_RS`) locale:
+ *
+ * |   Code   | Glyph | Replacement |               Description               |
+ * | -------- | ----- | ----------- | --------------------------------------- |
+ * | U+0110   | Đ     | DJ          | Latin capital letter D with stroke      |
+ * | U+0111   | đ     | dj          | Latin small letter d with stroke        |
+ *
  * @since 1.2.1
  * @since 4.6.0 Added locale support for `de_CH`, `de_CH_informal`, and `ca`.
+ * @since 4.7.0 Added locale support for `sr_RS`.
  *
  * @param string $string Text that might have accent characters
  * @return string Filtered string with replaced "nice" characters.
@@ -1697,6 +1705,9 @@ function remove_accents( $string ) {
 			$chars[ 'å' ] = 'aa';
 		} elseif ( 'ca' === $locale ) {
 			$chars[ 'l·l' ] = 'll';
+		} elseif ( 'sr_RS' === $locale ) {
+			$chars[ 'Đ' ] = 'DJ';
+			$chars[ 'đ' ] = 'dj';
 		}
 
 		$string = strtr($string, $chars);
@@ -3206,32 +3217,37 @@ function human_time_diff( $from, $to = '' ) {
 		$mins = round( $diff / MINUTE_IN_SECONDS );
 		if ( $mins <= 1 )
 			$mins = 1;
-		/* translators: min=minute */
+		/* translators: Time difference between two dates, in minutes (min=minute). 1: Number of minutes */
 		$since = sprintf( _n( '%s min', '%s mins', $mins ), $mins );
 	} elseif ( $diff < DAY_IN_SECONDS && $diff >= HOUR_IN_SECONDS ) {
 		$hours = round( $diff / HOUR_IN_SECONDS );
 		if ( $hours <= 1 )
 			$hours = 1;
+		/* translators: Time difference between two dates, in hours. 1: Number of hours */
 		$since = sprintf( _n( '%s hour', '%s hours', $hours ), $hours );
 	} elseif ( $diff < WEEK_IN_SECONDS && $diff >= DAY_IN_SECONDS ) {
 		$days = round( $diff / DAY_IN_SECONDS );
 		if ( $days <= 1 )
 			$days = 1;
+		/* translators: Time difference between two dates, in days. 1: Number of days */
 		$since = sprintf( _n( '%s day', '%s days', $days ), $days );
 	} elseif ( $diff < MONTH_IN_SECONDS && $diff >= WEEK_IN_SECONDS ) {
 		$weeks = round( $diff / WEEK_IN_SECONDS );
 		if ( $weeks <= 1 )
 			$weeks = 1;
+		/* translators: Time difference between two dates, in weeks. 1: Number of weeks */
 		$since = sprintf( _n( '%s week', '%s weeks', $weeks ), $weeks );
 	} elseif ( $diff < YEAR_IN_SECONDS && $diff >= MONTH_IN_SECONDS ) {
 		$months = round( $diff / MONTH_IN_SECONDS );
 		if ( $months <= 1 )
 			$months = 1;
+		/* translators: Time difference between two dates, in months. 1: Number of months */
 		$since = sprintf( _n( '%s month', '%s months', $months ), $months );
 	} elseif ( $diff >= YEAR_IN_SECONDS ) {
 		$years = round( $diff / YEAR_IN_SECONDS );
 		if ( $years <= 1 )
 			$years = 1;
+		/* translators: Time difference between two dates, in years. 1: Number of years */
 		$since = sprintf( _n( '%s year', '%s years', $years ), $years );
 	}
 
@@ -4642,6 +4658,7 @@ function wp_strip_all_tags($string, $remove_breaks = false) {
  *
  * @since 2.9.0
  *
+ * @see sanitize_textarea_field()
  * @see wp_check_invalid_utf8()
  * @see wp_strip_all_tags()
  *
@@ -4649,15 +4666,74 @@ function wp_strip_all_tags($string, $remove_breaks = false) {
  * @return string Sanitized string.
  */
 function sanitize_text_field( $str ) {
+	$filtered = _sanitize_text_fields( $str, false );
+
+	/**
+	 * Filters a sanitized text field string.
+	 *
+	 * @since 2.9.0
+	 *
+	 * @param string $filtered The sanitized string.
+	 * @param string $str      The string prior to being sanitized.
+	 */
+	return apply_filters( 'sanitize_text_field', $filtered, $str );
+}
+
+/**
+ * Sanitizes a multiline string from user input or from the database.
+ *
+ * The function is like sanitize_text_field(), but preserves
+ * new lines (\n) and other whitespace, which are legitimate
+ * input in textarea elements.
+ *
+ * @see sanitize_text_field()
+ *
+ * @since 4.7.0
+ *
+ * @param string $str String to sanitize.
+ * @return string Sanitized string.
+ */
+function sanitize_textarea_field( $str ) {
+	$filtered = _sanitize_text_fields( $str, true );
+
+	/**
+	 * Filters a sanitized textarea field string.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param string $filtered The sanitized string.
+	 * @param string $str      The string prior to being sanitized.
+	 */
+	return apply_filters( 'sanitize_textarea_field', $filtered, $str );
+}
+
+/**
+ * Internal helper function to sanitize a string from user input or from the db
+ *
+ * @since 4.7.0
+ * @access private
+ *
+ * @param string $str String to sanitize.
+ * @param bool $keep_newlines optional Whether to keep newlines. Default: false.
+ * @return string Sanitized string.
+ */
+function _sanitize_text_fields( $str, $keep_newlines = false ) {
 	$filtered = wp_check_invalid_utf8( $str );
 
 	if ( strpos($filtered, '<') !== false ) {
 		$filtered = wp_pre_kses_less_than( $filtered );
 		// This will strip extra whitespace for us.
-		$filtered = wp_strip_all_tags( $filtered, true );
-	} else {
-		$filtered = trim( preg_replace('/[\r\n\t ]+/', ' ', $filtered) );
+		$filtered = wp_strip_all_tags( $filtered, false );
+
+		// Use html entities in a special case to make sure no later
+		// newline stripping stage could lead to a functional tag
+		$filtered = str_replace("<\n", "&lt;\n", $filtered);
 	}
+
+	if ( ! $keep_newlines ) {
+		$filtered = preg_replace( '/[\r\n\t ]+/', ' ', $filtered );
+	}
+	$filtered = trim( $filtered );
 
 	$found = false;
 	while ( preg_match('/%[a-f0-9]{2}/i', $filtered, $match) ) {
@@ -4670,15 +4746,7 @@ function sanitize_text_field( $str ) {
 		$filtered = trim( preg_replace('/ +/', ' ', $filtered) );
 	}
 
-	/**
-	 * Filters a sanitized text field string.
-	 *
-	 * @since 2.9.0
-	 *
-	 * @param string $filtered The sanitized string.
-	 * @param string $str      The string prior to being sanitized.
-	 */
-	return apply_filters( 'sanitize_text_field', $filtered, $str );
+	return $filtered;
 }
 
 /**
@@ -4937,7 +5005,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for png images.
 		 */
-		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2/72x72/' ),
+		'baseUrl' => apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.2.1/72x72/' ),
 
 		/**
 		 * Filters the extension of the emoji png files.
@@ -4955,7 +5023,7 @@ function _print_emoji_detection_script() {
 		 *
 		 * @param string The emoji base URL for svg images.
 		 */
-		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2/svg/' ),
+		'svgUrl' => apply_filters( 'emoji_svg_url', 'https://s.w.org/images/core/emoji/2.2.1/svg/' ),
 
 		/**
 		 * Filters the extension of the emoji SVG files.
@@ -5067,7 +5135,7 @@ function wp_staticize_emoji( $text ) {
 	$text = wp_encode_emoji( $text );
 
 	/** This filter is documented in wp-includes/formatting.php */
-	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2/72x72/' );
+	$cdn_url = apply_filters( 'emoji_url', 'https://s.w.org/images/core/emoji/2.2.1/72x72/' );
 
 	/** This filter is documented in wp-includes/formatting.php */
 	$ext = apply_filters( 'emoji_ext', '.png' );

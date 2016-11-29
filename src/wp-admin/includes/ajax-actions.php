@@ -134,9 +134,9 @@ function wp_ajax_ajax_tag_search() {
 	 *
 	 * @since 4.0.0
 	 *
-	 * @param int    $characters The minimum number of characters required. Default 2.
-	 * @param object $tax        The taxonomy object.
-	 * @param string $s          The search term.
+	 * @param int         $characters The minimum number of characters required. Default 2.
+	 * @param WP_Taxonomy $tax        The taxonomy object.
+	 * @param string      $s          The search term.
 	 */
 	$term_search_min_chars = (int) apply_filters( 'term_search_min_chars', 2, $tax, $s );
 
@@ -594,12 +594,11 @@ function wp_ajax_delete_tag() {
 	$tag_id = (int) $_POST['tag_ID'];
 	check_ajax_referer( "delete-tag_$tag_id" );
 
-	$taxonomy = !empty($_POST['taxonomy']) ? $_POST['taxonomy'] : 'post_tag';
-	$tax = get_taxonomy($taxonomy);
-
-	if ( !current_user_can( $tax->cap->delete_terms ) )
+	if ( ! current_user_can( 'delete_term', $tag_id ) ) {
 		wp_die( -1 );
+	}
 
+	$taxonomy = !empty($_POST['taxonomy']) ? $_POST['taxonomy'] : 'post_tag';
 	$tag = get_term( $tag_id, $taxonomy );
 	if ( !$tag || is_wp_error( $tag ) )
 		wp_die( 1 );
@@ -796,8 +795,10 @@ function wp_ajax_add_link_category( $action ) {
 	if ( empty( $action ) )
 		$action = 'add-link-category';
 	check_ajax_referer( $action );
-	if ( !current_user_can( 'manage_categories' ) )
+	$tax = get_taxonomy( 'link_category' );
+	if ( ! current_user_can( $tax->cap->manage_terms ) ) {
 		wp_die( -1 );
+	}
 	$names = explode(',', wp_unslash( $_POST['newcat'] ) );
 	$x = new WP_Ajax_Response();
 	foreach ( $names as $cat_name ) {
@@ -1247,6 +1248,7 @@ function wp_ajax_add_meta() {
 			$post_data['post_type'] = $post->post_type;
 			$post_data['post_status'] = 'draft';
 			$now = current_time('timestamp', 1);
+			/* translators: 1: Post creation date, 2: Post creation time */
 			$post_data['post_title'] = sprintf( __( 'Draft created on %1$s at %2$s' ), date( __( 'F j, Y' ), $now ), date( __( 'g:i a' ), $now ) );
 
 			$pid = edit_post( $post_data );
@@ -1703,13 +1705,15 @@ function wp_ajax_inline_save_tax() {
 	if ( ! $tax )
 		wp_die( 0 );
 
-	if ( ! current_user_can( $tax->cap->edit_terms ) )
+	if ( ! isset( $_POST['tax_ID'] ) || ! ( $id = (int) $_POST['tax_ID'] ) ) {
 		wp_die( -1 );
+	}
+
+	if ( ! current_user_can( 'edit_term', $id ) ) {
+		wp_die( -1 );
+	}
 
 	$wp_list_table = _get_list_table( 'WP_Terms_List_Table', array( 'screen' => 'edit-' . $taxonomy ) );
-
-	if ( ! isset($_POST['tax_ID']) || ! ( $id = (int) $_POST['tax_ID'] ) )
-		wp_die( -1 );
 
 	$tag = get_term( $id, $taxonomy );
 	$_POST['description'] = $tag->description;
@@ -2015,7 +2019,7 @@ function wp_ajax_upload_attachment() {
 			echo wp_json_encode( array(
 				'success' => false,
 				'data'    => array(
-					'message'  => __( "You don't have permission to attach files to this post." ),
+					'message'  => __( 'Sorry, you are not allowed to attach files to this post.' ),
 					'filename' => $_FILES['async-upload']['name'],
 				)
 			) );
@@ -2396,6 +2400,11 @@ function wp_ajax_query_attachments() {
 
 	if ( current_user_can( get_post_type_object( 'attachment' )->cap->read_private_posts ) )
 		$query['post_status'] .= ',private';
+
+	// Filter query clauses to include filenames.
+	if ( isset( $query['s'] ) ) {
+		add_filter( 'posts_clauses', '_filter_query_attachment_filenames' );
+	}
 
 	/**
 	 * Filters the arguments passed to WP_Query during an Ajax
@@ -3399,7 +3408,7 @@ function wp_ajax_update_theme() {
 		) );
 	}
 
-	$stylesheet = sanitize_key( wp_unslash( $_POST['slug'] ) );
+	$stylesheet = preg_replace( '/[^A-z0-9_\-]/', '', wp_unslash( $_POST['slug'] ) );
 	$status     = array(
 		'update'     => 'theme',
 		'slug'       => $stylesheet,
@@ -3484,7 +3493,7 @@ function wp_ajax_delete_theme() {
 		) );
 	}
 
-	$stylesheet = sanitize_key( wp_unslash( $_POST['slug'] ) );
+	$stylesheet = preg_replace( '/[^A-z0-9_\-]/', '', wp_unslash( $_POST['slug'] ) );
 	$status     = array(
 		'delete' => 'theme',
 		'slug'   => $stylesheet,
@@ -3613,16 +3622,20 @@ function wp_ajax_install_plugin() {
 	}
 
 	$install_status = install_plugin_install_status( $api );
+	$pagenow = isset( $_POST['pagenow'] ) ? sanitize_key( $_POST['pagenow'] ) : '';
+
+	// If install request is coming from import page, do not return network activation link.
+	$plugins_url = ( 'import' === $pagenow ) ? admin_url( 'plugins.php' ) : network_admin_url( 'plugins.php' );
 
 	if ( current_user_can( 'activate_plugins' ) && is_plugin_inactive( $install_status['file'] ) ) {
 		$status['activateUrl'] = add_query_arg( array(
 			'_wpnonce' => wp_create_nonce( 'activate-plugin_' . $install_status['file'] ),
 			'action'   => 'activate',
 			'plugin'   => $install_status['file'],
-		), network_admin_url( 'plugins.php' ) );
+		), $plugins_url );
 	}
 
-	if ( is_multisite() && current_user_can( 'manage_network_plugins' ) ) {
+	if ( is_multisite() && current_user_can( 'manage_network_plugins' ) && 'import' !== $pagenow ) {
 		$status['activateUrl'] = add_query_arg( array( 'networkwide' => 1 ), $status['activateUrl'] );
 	}
 

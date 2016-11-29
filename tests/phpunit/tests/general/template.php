@@ -23,7 +23,10 @@ class Tests_General_Template extends WP_UnitTestCase {
 	}
 
 	function tearDown() {
+		global $wp_customize;
 		$this->_remove_custom_logo();
+		$this->_remove_site_icon();
+		$wp_customize = null;
 
 		parent::tearDown();
 	}
@@ -51,7 +54,6 @@ class Tests_General_Template extends WP_UnitTestCase {
 		$this->_set_site_icon();
 		$this->expectOutputString( $this->site_icon_url );
 		site_icon_url();
-		$this->_remove_site_icon();
 	}
 
 	/**
@@ -117,8 +119,6 @@ class Tests_General_Template extends WP_UnitTestCase {
 
 		$this->expectOutputString( $output );
 		wp_site_icon();
-
-		$this->_remove_site_icon();
 	}
 
 	/**
@@ -143,8 +143,51 @@ class Tests_General_Template extends WP_UnitTestCase {
 		add_filter( 'site_icon_meta_tags', array( $this, '_custom_site_icon_meta_tag' ) );
 		wp_site_icon();
 		remove_filter( 'site_icon_meta_tags', array( $this, '_custom_site_icon_meta_tag' ) );
+	}
 
-		$this->_remove_site_icon();
+	/**
+	 * @group site_icon
+	 * @ticket 38377
+	 */
+	function test_customize_preview_wp_site_icon_empty() {
+		global $wp_customize;
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->register_controls();
+		$wp_customize->start_previewing_theme();
+
+		$this->expectOutputString( '<link rel="icon" href="/favicon.ico" sizes="32x32" />' . "\n" );
+		wp_site_icon();
+	}
+
+	/**
+	 * @group site_icon
+	 * @ticket 38377
+	 */
+	function test_customize_preview_wp_site_icon_dirty() {
+		global $wp_customize;
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+		$wp_customize = new WP_Customize_Manager();
+		$wp_customize->register_controls();
+		$wp_customize->start_previewing_theme();
+
+		$attachment_id = $this->_insert_attachment();
+		$wp_customize->set_post_value( 'site_icon', $attachment_id );
+		$wp_customize->get_setting( 'site_icon' )->preview();
+		$output = array(
+			sprintf( '<link rel="icon" href="%s" sizes="32x32" />', esc_url( wp_get_attachment_image_url( $attachment_id, 32 ) ) ),
+			sprintf( '<link rel="icon" href="%s" sizes="192x192" />', esc_url( wp_get_attachment_image_url( $attachment_id, 192 ) ) ),
+			sprintf( '<link rel="apple-touch-icon-precomposed" href="%s" />', esc_url( wp_get_attachment_image_url( $attachment_id, 180 ) ) ),
+			sprintf( '<meta name="msapplication-TileImage" content="%s" />', esc_url( wp_get_attachment_image_url( $attachment_id, 270 ) ) ),
+			'',
+		);
+		$output = implode( "\n", $output );
+		$this->expectOutputString( $output );
+		wp_site_icon();
 	}
 
 	/**
@@ -487,5 +530,71 @@ class Tests_General_Template extends WP_UnitTestCase {
 		$expected = '1453390476';
 		$actual = get_the_modified_time( $d, $post_id );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @ticket 38253
+	 */
+	function test_get_site_icon_url_preserves_switched_state() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'This test requires multisite.' );
+		}
+
+		$blog_id = $this->factory->blog->create();
+		switch_to_blog( $blog_id );
+
+		$expected = $GLOBALS['_wp_switched_stack'];
+
+		get_site_icon_url( 512, '', $blog_id );
+
+		$result = $GLOBALS['_wp_switched_stack'];
+
+		restore_current_blog();
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * @ticket 38253
+	 */
+	function test_has_custom_logo_preserves_switched_state() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'This test requires multisite.' );
+		}
+
+		$blog_id = $this->factory->blog->create();
+		switch_to_blog( $blog_id );
+
+		$expected = $GLOBALS['_wp_switched_stack'];
+
+		has_custom_logo( $blog_id );
+
+		$result = $GLOBALS['_wp_switched_stack'];
+
+		restore_current_blog();
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * @ticket 38253
+	 */
+	function test_get_custom_logo_preserves_switched_state() {
+		if ( ! is_multisite() ) {
+			$this->markTestSkipped( 'This test requires multisite.' );
+		}
+
+		$blog_id = $this->factory->blog->create();
+		switch_to_blog( $blog_id );
+
+		$expected = $GLOBALS['_wp_switched_stack'];
+
+		get_custom_logo( $blog_id );
+
+		$result = $GLOBALS['_wp_switched_stack'];
+
+		restore_current_blog();
+
+		$this->assertSame( $expected, $result );
 	}
 }

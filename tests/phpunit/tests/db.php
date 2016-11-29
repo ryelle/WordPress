@@ -565,14 +565,6 @@ class Tests_DB extends WP_UnitTestCase {
 			"DELETE a FROM $table a",
 			"DELETE `a` FROM $table a",
 
-			// STATUS
-			"SHOW TABLE STATUS LIKE '$table'",
-			"SHOW TABLE STATUS WHERE NAME='$table'",
-
-			"SHOW TABLES LIKE '$table'",
-			"SHOW FULL TABLES LIKE '$table'",
-			"SHOW TABLES WHERE NAME='$table'",
-
 			// Extended
 			"EXPLAIN SELECT * FROM $table",
 			"EXPLAIN EXTENDED SELECT * FROM $table",
@@ -668,6 +660,33 @@ class Tests_DB extends WP_UnitTestCase {
 	 */
 	function test_get_table_from_query_false( $query ) {
 		$this->assertFalse( self::$_wpdb->get_table_from_query( $query ) );
+	}
+
+	/**
+	 * @ticket 38751
+	 */
+	function data_get_escaped_table_from_show_query() {
+		return array(
+			// Equality
+			array( "SHOW TABLE STATUS WHERE Name = 'test_name'", 'test_name' ),
+			array( "SHOW TABLE STATUS WHERE NAME=\"test_name\"", 'test_name' ),
+			array( "SHOW TABLES WHERE Name = \"test_name\"",     'test_name' ),
+			array( "SHOW FULL TABLES WHERE Name='test_name'",    'test_name' ),
+
+			// LIKE
+			array( "SHOW TABLE STATUS LIKE 'test\_prefix\_%'",   'test_prefix_' ),
+			array( "SHOW TABLE STATUS LIKE \"test\_prefix\_%\"", 'test_prefix_' ),
+			array( "SHOW TABLES LIKE 'test\_prefix\_%'",         'test_prefix_' ),
+			array( "SHOW FULL TABLES LIKE \"test\_prefix\_%\"",  'test_prefix_' ),
+		);
+	}
+
+	/**
+	 * @dataProvider data_get_escaped_table_from_show_query
+	 * @ticket 38751
+	 */
+	function test_get_escaped_table_from_show_query( $query, $table ) {
+		$this->assertEquals( $table, self::$_wpdb->get_table_from_query( $query ) );
 	}
 
 	/**
@@ -1030,5 +1049,24 @@ class Tests_DB extends WP_UnitTestCase {
 		$result = $wpdb->determine_charset( $charset, $collate );
 
 		$this->assertSame( 'utf8mb4_swedish_ci', $result['collate'] );
+	}
+
+	/**
+	 * @ticket 37982
+	 */
+	function test_charset_switched_to_utf8() {
+		global $wpdb;
+
+		if ( $wpdb->has_cap( 'utf8mb4' ) ) {
+			$this->markTestSkipped( 'This test requires utf8mb4 to not be supported.' );
+		}
+
+		$charset = 'utf8mb4';
+		$collate = 'utf8mb4_general_ci';
+
+		$result = $wpdb->determine_charset( $charset, $collate );
+
+		$this->assertSame( 'utf8', $result['charset'] );
+		$this->assertSame( 'utf8_general_ci', $result['collate'] );
 	}
 }

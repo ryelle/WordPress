@@ -51,17 +51,12 @@ class Test_WP_Customize_Selective_Refresh_Ajax extends WP_UnitTestCase {
 		if ( isset( $this->wp_customize->selective_refresh ) ) {
 			$this->selective_refresh = $this->wp_customize->selective_refresh;
 		}
-
 	}
 
 	/**
 	 * Do Customizer boot actions.
 	 */
 	function do_customize_boot_actions() {
-		// Remove actions that call add_theme_support( 'title-tag' ).
-		remove_action( 'after_setup_theme', 'twentyfifteen_setup' );
-		remove_action( 'after_setup_theme', 'twentysixteen_setup' );
-
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		do_action( 'setup_theme' );
 		do_action( 'after_setup_theme' );
@@ -137,25 +132,6 @@ class Test_WP_Customize_Selective_Refresh_Ajax extends WP_UnitTestCase {
 		$_REQUEST['nonce'] = wp_create_nonce( 'preview-customize_' . $this->wp_customize->theme()->get_stylesheet() );
 		$_POST[ WP_Customize_Selective_Refresh::RENDER_QUERY_VAR ] = '1';
 		$this->do_customize_boot_actions();
-	}
-
-	/**
-	 * Make sure that the Customizer "signature" is not included in partial render responses.
-	 *
-	 * @see WP_Customize_Selective_Refresh::handle_render_partials_request()
-	 */
-	function test_handle_render_partials_request_removes_customize_signature() {
-		$this->setup_valid_render_partials_request_environment();
-		$this->assertTrue( is_customize_preview() );
-		$this->assertEquals( 1000, has_action( 'shutdown', array( $this->wp_customize, 'customize_preview_signature' ) ) );
-		ob_start();
-		try {
-			$this->selective_refresh->handle_render_partials_request();
-		} catch ( WPDieException $e ) {
-			unset( $e );
-		}
-		ob_end_clean();
-		$this->assertFalse( has_action( 'shutdown', array( $this->wp_customize, 'customize_preview_signature' ) ) );
 	}
 
 	/**

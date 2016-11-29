@@ -183,9 +183,7 @@ function image_hwstring( $width, $height ) {
  *                     the image is an intermediate size. False on failure.
  */
 function image_downsize( $id, $size = 'medium' ) {
-
-	if ( !wp_attachment_is_image($id) )
-		return false;
+	$is_image = wp_attachment_is_image( $id );
 
 	/**
 	 * Filters whether to preempt the output of image_downsize().
@@ -209,6 +207,19 @@ function image_downsize( $id, $size = 'medium' ) {
 	$width = $height = 0;
 	$is_intermediate = false;
 	$img_url_basename = wp_basename($img_url);
+
+	// If the file isn't an image, attempt to replace its URL with a rendered image from its meta.
+	// Otherwise, a non-image type could be returned.
+	if ( ! $is_image ) {
+		if ( ! empty( $meta['sizes'] ) ) {
+			$img_url = str_replace( $img_url_basename, $meta['sizes']['full']['file'], $img_url );
+			$img_url_basename = $meta['sizes']['full']['file'];
+			$width = $meta['sizes']['full']['width'];
+			$height = $meta['sizes']['full']['height'];
+		} else {
+			return false;
+		}
+	}
 
 	// try for a new style intermediate size
 	if ( $intermediate = image_get_intermediate_size($id, $size) ) {
@@ -685,6 +696,11 @@ function image_get_intermediate_size( $post_id, $size = 'thumbnail' ) {
 	if ( is_array( $size ) ) {
 		$candidates = array();
 
+		if ( ! isset( $imagedata['file'] ) && isset( $imagedata['sizes']['full'] ) ) {
+			$imagedata['height'] = $imagedata['sizes']['full']['height'];
+			$imagedata['width']  = $imagedata['sizes']['full']['width'];
+		}
+
 		foreach ( $imagedata['sizes'] as $_size => $data ) {
 			// If there's an exact match to an existing image size, short circuit.
 			if ( $data['width'] == $size[0] && $data['height'] == $size[1] ) {
@@ -738,7 +754,7 @@ function image_get_intermediate_size( $post_id, $size = 'thumbnail' ) {
 	}
 
 	// include the full filesystem path of the intermediate file
-	if ( empty($data['path']) && !empty($data['file']) ) {
+	if ( empty( $data['path'] ) && ! empty( $data['file'] ) && ! empty( $imagedata['file'] ) ) {
 		$file_url = wp_get_attachment_url($post_id);
 		$data['path'] = path_join( dirname($imagedata['file']), $data['file'] );
 		$data['url'] = path_join( dirname($file_url), $data['file'] );
@@ -866,12 +882,8 @@ function wp_get_attachment_image($attachment_id, $size = 'thumbnail', $icon = fa
 		$default_attr = array(
 			'src'	=> $src,
 			'class'	=> "attachment-$size_class size-$size_class",
-			'alt'	=> trim(strip_tags( get_post_meta($attachment_id, '_wp_attachment_image_alt', true) )), // Use Alt field first
+			'alt'	=> trim( strip_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ),
 		);
-		if ( empty($default_attr['alt']) )
-			$default_attr['alt'] = trim(strip_tags( $attachment->post_excerpt )); // If not, Use the Caption
-		if ( empty($default_attr['alt']) )
-			$default_attr['alt'] = trim(strip_tags( $attachment->post_title )); // Finally, use the title
 
 		$attr = wp_parse_args( $attr, $default_attr );
 
@@ -2603,7 +2615,7 @@ function wp_video_shortcode( $attr, $content = '' ) {
 
 	$width_rule = '';
 	if ( ! empty( $atts['width'] ) ) {
-		$width_rule = sprintf( 'width: %dpx; ', $atts['width'] );
+		$width_rule = sprintf( 'width: %dpx;', $atts['width'] );
 	}
 	$output = sprintf( '<div style="%s" class="wp-video">%s</div>', $width_rule, $html );
 
@@ -3127,7 +3139,7 @@ function wp_prepare_attachment_for_js( $attachment ) {
 	if ( current_user_can( 'delete_post', $attachment->ID ) )
 		$response['nonces']['delete'] = wp_create_nonce( 'delete-post_' . $attachment->ID );
 
-	if ( $meta && 'image' === $type ) {
+	if ( $meta && ! empty( $meta['sizes'] ) ) {
 		$sizes = array();
 
 		/** This filter is documented in wp-admin/includes/media.php */
@@ -3147,8 +3159,10 @@ function wp_prepare_attachment_for_js( $attachment ) {
 
 			/** This filter is documented in wp-includes/media.php */
 			if ( $downsize = apply_filters( 'image_downsize', false, $attachment->ID, $size ) ) {
-				if ( ! $downsize[3] )
+				if ( empty( $downsize[3] ) ) {
 					continue;
+				}
+
 				$sizes[ $size ] = array(
 					'height'      => $downsize[2],
 					'width'       => $downsize[1],
@@ -3175,16 +3189,29 @@ function wp_prepare_attachment_for_js( $attachment ) {
 			}
 		}
 
-		$sizes['full'] = array( 'url' => $attachment_url );
+		if ( 'image' === $type ) {
+			$sizes['full'] = array( 'url' => $attachment_url );
 
-		if ( isset( $meta['height'], $meta['width'] ) ) {
-			$sizes['full']['height'] = $meta['height'];
-			$sizes['full']['width'] = $meta['width'];
-			$sizes['full']['orientation'] = $meta['height'] > $meta['width'] ? 'portrait' : 'landscape';
+			if ( isset( $meta['height'], $meta['width'] ) ) {
+				$sizes['full']['height'] = $meta['height'];
+				$sizes['full']['width'] = $meta['width'];
+				$sizes['full']['orientation'] = $meta['height'] > $meta['width'] ? 'portrait' : 'landscape';
+			}
+
+			$response = array_merge( $response, $sizes['full'] );
+		} elseif ( $meta['sizes']['full']['file'] ) {
+			$sizes['full'] = array(
+				'url'         => $base_url . $meta['sizes']['full']['file'],
+				'height'      => $meta['sizes']['full']['height'],
+				'width'       => $meta['sizes']['full']['width'],
+				'orientation' => $meta['sizes']['full']['height'] > $meta['sizes']['full']['width'] ? 'portrait' : 'landscape'
+			);
 		}
 
-		$response = array_merge( $response, array( 'sizes' => $sizes ), $sizes['full'] );
-	} elseif ( $meta && 'video' === $type ) {
+		$response = array_merge( $response, array( 'sizes' => $sizes ) );
+	}
+
+	if ( $meta && 'video' === $type ) {
 		if ( isset( $meta['width'] ) )
 			$response['width'] = (int) $meta['width'];
 		if ( isset( $meta['height'] ) )
@@ -3420,6 +3447,7 @@ function wp_enqueue_media( $args = array() ) {
 		'filterByDate'           => __( 'Filter by date' ),
 		'filterByType'           => __( 'Filter by type' ),
 		'searchMediaLabel'       => __( 'Search Media' ),
+		'searchMediaPlaceholder' => __( 'Search media items...' ), // placeholder (no ellipsis)
 		'noMedia'                => __( 'No media files found.' ),
 
 		// Library Details

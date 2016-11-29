@@ -21,18 +21,18 @@ function tests_reset__SERVER() {
 
 // For adding hooks before loading WP
 function tests_add_filter($tag, $function_to_add, $priority = 10, $accepted_args = 1) {
-	global $wp_filter, $merged_filters;
+	global $wp_filter;
 
-	$idx = _test_filter_build_unique_id($tag, $function_to_add, $priority);
-	$wp_filter[$tag][$priority][$idx] = array('function' => $function_to_add, 'accepted_args' => $accepted_args);
-	unset( $merged_filters[ $tag ] );
+	if ( function_exists( 'add_filter' ) ) {
+		add_filter( $tag, $function_to_add, $priority, $accepted_args );
+	} else {
+		$idx = _test_filter_build_unique_id($tag, $function_to_add, $priority);
+		$wp_filter[$tag][$priority][$idx] = array('function' => $function_to_add, 'accepted_args' => $accepted_args);
+	}
 	return true;
 }
 
 function _test_filter_build_unique_id($tag, $function, $priority) {
-	global $wp_filter;
-	static $filter_id_count = 0;
-
 	if ( is_string($function) )
 		return $function;
 
@@ -160,4 +160,25 @@ function _upload_dir_https( $uploads ) {
 	$uploads['baseurl'] = str_replace( 'http://', 'https://', $uploads['baseurl'] );
 
 	return $uploads;
+}
+
+// Skip `setcookie` calls in auth_cookie functions due to warning:
+// Cannot modify header information - headers already sent by ...
+
+function wp_set_auth_cookie( $user_id, $remember = false, $secure = '', $token = '' ) {
+	$auth_cookie = null;
+	$expire = null;
+	$expiration = null;
+	$user_id = null;
+	$scheme = null;
+	/** This action is documented in wp-inclues/pluggable.php */
+	do_action( 'set_auth_cookie', $auth_cookie, $expire, $expiration, $user_id, $scheme );
+	$logged_in_cookie = null;
+	/** This action is documented in wp-inclues/pluggable.php */
+	do_action( 'set_logged_in_cookie', $logged_in_cookie, $expire, $expiration, $user_id, 'logged_in' );
+}
+
+function wp_clear_auth_cookie() {
+	/** This action is documented in wp-inclues/pluggable.php */
+	do_action( 'clear_auth_cookie' );
 }

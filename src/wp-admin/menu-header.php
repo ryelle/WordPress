@@ -234,9 +234,11 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 		echo "</li>";
 	}
 
-	echo '<li id="collapse-menu" class="hide-if-no-js"><div class="wp-menu-image">' . wp_icon( 'dashicons-admin-collapse' ) . '</div>';
-	echo '<span>' . esc_html__( 'Collapse menu' ) . '</span>';
-	echo '</li>';
+	echo '<li id="collapse-menu" class="hide-if-no-js">' .
+		'<button type="button" id="collapse-button" aria-label="' . esc_attr__( 'Collapse Main menu' ) . '" aria-expanded="true">' .
+		wp_icon( 'dashicons-admin-collapse' ) .
+		'<span class="collapse-button-label">' . __( 'Collapse menu' ) . '</span>' .
+		'</button></li>';
 }
 
 ?>

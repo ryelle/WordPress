@@ -41,7 +41,7 @@ class Tests_XMLRPC_wp_editProfile extends WP_XMLRPC_UnitTestCase {
 
     function test_ignore_password_change() {
         $this->make_user_by_role( 'author' );
-        $new_pass = rand_str();
+        $new_pass = 'newpassword';
         $new_data = array( 'password' => $new_pass );
 
         $result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'author', 'author', $new_data ) );
@@ -51,12 +51,12 @@ class Tests_XMLRPC_wp_editProfile extends WP_XMLRPC_UnitTestCase {
         $auth_old = wp_authenticate( 'author', 'author' );
         $auth_new = wp_authenticate( 'author', $new_pass );
         $this->assertInstanceOf( 'WP_User', $auth_old );
-        $this->assertTrue( is_wp_error( $auth_new ) );
+        $this->assertWPError( $auth_new );
     }
 
     function test_ignore_email_change() {
         $editor_id = $this->make_user_by_role( 'editor' );
-        $new_email = rand_str() . '@example.com';
+        $new_email = 'notaneditor@example.com';
         $new_data = array( 'email' => $new_email );
 
         $result = $this->myxmlrpcserver->wp_editProfile( array( 1, 'editor', 'editor', $new_data ) );

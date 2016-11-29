@@ -622,7 +622,7 @@ class Tests_Comment_Submission extends WP_UnitTestCase {
 
 		$data = array(
 			'comment_post_ID' => $post->ID,
-			'comment'         => rand_str(),
+			'comment'         => 'Comment',
 			'author'          => rand_long_str( 255 ),
 			'email'           => 'comment@example.org',
 		);
@@ -642,7 +642,7 @@ class Tests_Comment_Submission extends WP_UnitTestCase {
 
 		$data = array(
 			'comment_post_ID' => $post->ID,
-			'comment'         => rand_str(),
+			'comment'         => 'Comment',
 			'author'          => 'Comment Author',
 			'email'           => rand_long_str( 90 ) . '@example.com',
 		);
@@ -661,7 +661,7 @@ class Tests_Comment_Submission extends WP_UnitTestCase {
 		$post = self::factory()->post->create_and_get();
 		$data = array(
 			'comment_post_ID' => $post->ID,
-			'comment'         => rand_str(),
+			'comment'         => 'Comment',
 			'author'          => 'Comment Author',
 			'email'           => 'comment@example.org',
 			'url'             => rand_long_str( 201 ),
@@ -714,4 +714,71 @@ class Tests_Comment_Submission extends WP_UnitTestCase {
 		return $commentdata;
 	}
 
+	/**
+	 * @ticket 36901
+	 */
+	public function test_submitting_duplicate_comments() {
+		$post = self::factory()->post->create_and_get( array(
+			'post_status' => 'publish',
+		) );
+		$data = array(
+			'comment_post_ID' => $post->ID,
+			'comment'         => 'Did I say that?',
+			'author'          => 'Repeat myself',
+			'email'           => 'mail@example.com',
+		);
+		$first_comment = wp_handle_comment_submission( $data );
+		$second_comment = wp_handle_comment_submission( $data );
+		$this->assertWPError( $second_comment );
+		$this->assertSame( 'comment_duplicate', $second_comment->get_error_code() );
+	}
+
+	/**
+	 * @ticket 36901
+	 */
+	public function test_comments_flood() {
+		$post = self::factory()->post->create_and_get( array(
+			'post_status' => 'publish',
+		) );
+		$data = array(
+			'comment_post_ID' => $post->ID,
+			'comment'         => 'Did I say that?',
+			'author'          => 'Repeat myself',
+			'email'           => 'mail@example.com',
+		);
+		$first_comment = wp_handle_comment_submission( $data );
+
+		$data['comment'] = 'Wow! I am quick!';
+		$second_comment = wp_handle_comment_submission( $data );
+
+		$this->assertWPError( $second_comment );
+		$this->assertSame( 'comment_flood', $second_comment->get_error_code() );
+	}
+
+	/**
+	 * @ticket 36901
+	 */
+	public function test_comments_flood_user_is_admin() {
+		$user = self::factory()->user->create_and_get( array(
+			'role' => 'administrator',
+		) );
+		wp_set_current_user( $user->ID );
+
+		$post = self::factory()->post->create_and_get( array(
+			'post_status' => 'publish',
+		) );
+		$data = array(
+			'comment_post_ID' => $post->ID,
+			'comment'         => 'Did I say that?',
+			'author'          => 'Repeat myself',
+			'email'           => 'mail@example.com',
+		);
+		$first_comment = wp_handle_comment_submission( $data );
+
+		$data['comment'] = 'Wow! I am quick!';
+		$second_comment = wp_handle_comment_submission( $data );
+
+		$this->assertNotWPError( $second_comment );
+		$this->assertEquals( $post->ID, $second_comment->comment_post_ID );
+	}
 }

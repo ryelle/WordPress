@@ -233,7 +233,7 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 			} else {
 				$value = $post_value;
 			}
-		} else if ( isset( $this->value ) ) {
+		} elseif ( isset( $this->value ) ) {
 			$value = $this->value;
 		} else {
 			$value = false;
@@ -242,7 +242,11 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 			if ( $this->post_id > 0 ) {
 				$post = get_post( $this->post_id );
 				if ( $post && self::POST_TYPE === $post->post_type ) {
+					$is_title_empty = empty( $post->post_title );
 					$value = (array) wp_setup_nav_menu_item( $post );
+					if ( $is_title_empty ) {
+						$value['title'] = '';
+					}
 				}
 			}
 
@@ -257,6 +261,41 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Get original title.
+	 *
+	 * @since 4.7.0
+	 * @access protected
+	 *
+	 * @param object $item Nav menu item.
+	 * @return string The original title.
+	 */
+	protected function get_original_title( $item ) {
+		if ( empty( $item->object_id ) ) {
+			return '';
+		}
+		$original_title = '';
+		if ( 'post_type' === $item->type ) {
+			$original_object = get_post( $item->object_id );
+			if ( $original_object ) {
+				/** This filter is documented in wp-includes/post-template.php */
+				$original_title = apply_filters( 'the_title', $original_object->post_title, $original_object->ID );
+
+				if ( '' === $original_title ) {
+					/* translators: %d: ID of a post */
+					$original_title = sprintf( __( '#%d (no title)' ), $original_object->ID );
+				}
+			}
+		} elseif ( 'taxonomy' === $item->type ) {
+			$original_term_title = get_term_field( 'name', $item->object_id, $item->object, 'raw' );
+			if ( ! is_wp_error( $original_term_title ) ) {
+				$original_title = $original_term_title;
+			}
+		}
+		$original_title = html_entity_decode( $original_title, ENT_QUOTES, get_bloginfo( 'charset' ) );
+		return $original_title;
 	}
 
 	/**
@@ -284,16 +323,7 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 		}
 
 		if ( ! isset( $this->value['original_title'] ) ) {
-			$original_title = '';
-			if ( 'post_type' === $this->value['type'] ) {
-				$original_title = get_the_title( $this->value['object_id'] );
-			} elseif ( 'taxonomy' === $this->value['type'] ) {
-				$original_title = get_term_field( 'name', $this->value['object_id'], $this->value['object'], 'raw' );
-				if ( is_wp_error( $original_title ) ) {
-					$original_title = '';
-				}
-			}
-			$this->value['original_title'] = html_entity_decode( $original_title, ENT_QUOTES, get_bloginfo( 'charset' ) );
+			$this->value['original_title'] = $this->get_original_title( (object) $this->value );
 		}
 
 		if ( ! isset( $this->value['nav_menu_term_id'] ) && $this->post_id > 0 ) {
@@ -503,8 +533,9 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 		}
 
 		if ( ARRAY_A === $args['output'] ) {
-			$GLOBALS['_menu_item_sort_prop'] = $args['output_key'];
-			usort( $items, '_sort_nav_menu_items' );
+			$items = wp_list_sort( $items, array(
+				$args['output_key'] => 'ASC',
+			) );
 			$i = 1;
 
 			foreach ( $items as $k => $item ) {
@@ -534,6 +565,12 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 		$item->menu_order = $item->position;
 		unset( $item->position );
 
+		if ( empty( $item->original_title ) ) {
+			$item->original_title = $this->get_original_title( $item );
+		}
+		if ( empty( $item->title ) && ! empty( $item->original_title ) ) {
+			$item->title = $item->original_title;
+		}
 		if ( $item->title ) {
 			$item->post_title = $item->title;
 		}
@@ -554,7 +591,7 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 				} else {
 					$post->type_label = $post->object;
 				}
-			} elseif ( 'taxonomy' == $post->type ) {
+			} elseif ( 'taxonomy' === $post->type ) {
 				$object = get_taxonomy( $post->object );
 				if ( $object ) {
 					$post->type_label = $object->labels->singular_name;
@@ -564,6 +601,18 @@ class WP_Customize_Nav_Menu_Item_Setting extends WP_Customize_Setting {
 			} else {
 				$post->type_label = __( 'Custom Link' );
 			}
+		}
+
+		// Ensure nav menu item URL is set according to linked object.
+		if ( 'post_type' === $post->type && ! empty( $post->object_id ) ) {
+			$post->url = get_permalink( $post->object_id );
+		} elseif ( 'taxonomy' === $post->type && ! empty( $post->object ) && ! empty( $post->object_id ) ) {
+			$post->url = get_term_link( (int) $post->object_id, $post->object );
+		} elseif ( 'post_type_archive' === $post->type && ! empty( $post->object ) ) {
+			$post->url = get_post_type_archive_link( $post->object );
+		}
+		if ( is_wp_error( $post->url ) ) {
+			$post->url = '';
 		}
 
 		/** This filter is documented in wp-includes/nav-menu.php */

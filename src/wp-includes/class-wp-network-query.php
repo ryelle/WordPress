@@ -87,13 +87,6 @@ class WP_Network_Query {
 	public $max_num_pages = 0;
 
 	/**
-	 * @since 4.7.0
-	 * @access protected
-	 * @var wpdb
-	 */
-	protected $db;
-
-	/**
 	 * Constructor.
 	 *
 	 * Sets up the network query, based on the query vars passed.
@@ -118,12 +111,10 @@ class WP_Network_Query {
  	 *                                              'domain_length', 'path_length' and 'network__in'. Also accepts false,
  	 *                                              an empty array, or 'none' to disable `ORDER BY` clause. Default 'id'.
  	 *     @type string       $order                How to order retrieved networks. Accepts 'ASC', 'DESC'. Default 'ASC'.
- 	 *     @type string       $domain               Limit results to those affiliated with a given network ID.
- 	 *                                              Default current network ID.
+ 	 *     @type string       $domain               Limit results to those affiliated with a given domain. Default empty.
  	 *     @type array        $domain__in           Array of domains to include affiliated networks for. Default empty.
  	 *     @type array        $domain__not_in       Array of domains to exclude affiliated networks for. Default empty.
- 	 *     @type string       $path                 Limit results to those affiliated with a given network ID.
- 	 *                                              Default current network ID.
+ 	 *     @type string       $path                 Limit results to those affiliated with a given path. Default empty.
  	 *     @type array        $path__in             Array of paths to include affiliated networks for. Default empty.
  	 *     @type array        $path__not_in         Array of paths to exclude affiliated networks for. Default empty.
  	 *     @type string       $search               Search term(s) to retrieve matching networks for. Default empty.
@@ -131,8 +122,6 @@ class WP_Network_Query {
 	 * }
 	 */
 	public function __construct( $query = '' ) {
-		$this->db = $GLOBALS['wpdb'];
-
 		$this->query_var_defaults = array(
 			'network__in'          => '',
 			'network__not_in'      => '',
@@ -220,11 +209,7 @@ class WP_Network_Query {
 
 		// $args can include anything. Only use the args defined in the query_var_defaults to compute the key.
 		$key = md5( serialize( wp_array_slice_assoc( $this->query_vars, array_keys( $this->query_var_defaults ) ) ) );
-		$last_changed = wp_cache_get( 'last_changed', 'networks' );
-		if ( ! $last_changed ) {
-			$last_changed = microtime();
-			wp_cache_set( 'last_changed', $last_changed, 'networks' );
-		}
+		$last_changed = wp_cache_get_last_changed( 'networks' );
 
 		$cache_key = "get_network_ids:$key:$last_changed";
 		$cache_value = wp_cache_get( $cache_key, 'networks' );
@@ -299,6 +284,8 @@ class WP_Network_Query {
 	 * @return int|array A single count of network IDs if a count query. An array of network IDs if a full query.
 	 */
 	protected function get_network_ids() {
+		global $wpdb;
+
 		$order = $this->parse_order( $this->query_vars['order'] );
 
 		// Disable ORDER BY with 'none', an empty array, or boolean false.
@@ -339,7 +326,7 @@ class WP_Network_Query {
 
 			$orderby = implode( ', ', $orderby_array );
 		} else {
-			$orderby = "{$this->db->site}.id $order";
+			$orderby = "$wpdb->site.id $order";
 		}
 
 		$number = absint( $this->query_vars['number'] );
@@ -356,52 +343,52 @@ class WP_Network_Query {
 		if ( $this->query_vars['count'] ) {
 			$fields = 'COUNT(*)';
 		} else {
-			$fields = "{$this->db->site}.id";
+			$fields = "$wpdb->site.id";
 		}
 
 		// Parse network IDs for an IN clause.
 		if ( ! empty( $this->query_vars['network__in'] ) ) {
-			$this->sql_clauses['where']['network__in'] = "{$this->db->site}.id IN ( " . implode( ',', wp_parse_id_list( $this->query_vars['network__in'] ) ) . ' )';
+			$this->sql_clauses['where']['network__in'] = "$wpdb->site.id IN ( " . implode( ',', wp_parse_id_list( $this->query_vars['network__in'] ) ) . ' )';
 		}
 
 		// Parse network IDs for a NOT IN clause.
 		if ( ! empty( $this->query_vars['network__not_in'] ) ) {
-			$this->sql_clauses['where']['network__not_in'] = "{$this->db->site}.id NOT IN ( " . implode( ',', wp_parse_id_list( $this->query_vars['network__not_in'] ) ) . ' )';
+			$this->sql_clauses['where']['network__not_in'] = "$wpdb->site.id NOT IN ( " . implode( ',', wp_parse_id_list( $this->query_vars['network__not_in'] ) ) . ' )';
 		}
 
 		if ( ! empty( $this->query_vars['domain'] ) ) {
-			$this->sql_clauses['where']['domain'] = $this->db->prepare( "{$this->db->site}.domain = %s", $this->query_vars['domain'] );
+			$this->sql_clauses['where']['domain'] = $wpdb->prepare( "$wpdb->site.domain = %s", $this->query_vars['domain'] );
 		}
 
 		// Parse network domain for an IN clause.
 		if ( is_array( $this->query_vars['domain__in'] ) ) {
-			$this->sql_clauses['where']['domain__in'] = "{$this->db->site}.domain IN ( '" . implode( "', '", $this->db->_escape( $this->query_vars['domain__in'] ) ) . "' )";
+			$this->sql_clauses['where']['domain__in'] = "$wpdb->site.domain IN ( '" . implode( "', '", $wpdb->_escape( $this->query_vars['domain__in'] ) ) . "' )";
 		}
 
 		// Parse network domain for a NOT IN clause.
 		if ( is_array( $this->query_vars['domain__not_in'] ) ) {
-			$this->sql_clauses['where']['domain__not_in'] = "{$this->db->site}.domain NOT IN ( '" . implode( "', '", $this->db->_escape( $this->query_vars['domain__not_in'] ) ) . "' )";
+			$this->sql_clauses['where']['domain__not_in'] = "$wpdb->site.domain NOT IN ( '" . implode( "', '", $wpdb->_escape( $this->query_vars['domain__not_in'] ) ) . "' )";
 		}
 
 		if ( ! empty( $this->query_vars['path'] ) ) {
-			$this->sql_clauses['where']['path'] = $this->db->prepare( "{$this->db->site}.path = %s", $this->query_vars['path'] );
+			$this->sql_clauses['where']['path'] = $wpdb->prepare( "$wpdb->site.path = %s", $this->query_vars['path'] );
 		}
 
 		// Parse network path for an IN clause.
 		if ( is_array( $this->query_vars['path__in'] ) ) {
-			$this->sql_clauses['where']['path__in'] = "{$this->db->site}.path IN ( '" . implode( "', '", $this->db->_escape( $this->query_vars['path__in'] ) ) . "' )";
+			$this->sql_clauses['where']['path__in'] = "$wpdb->site.path IN ( '" . implode( "', '", $wpdb->_escape( $this->query_vars['path__in'] ) ) . "' )";
 		}
 
 		// Parse network path for a NOT IN clause.
 		if ( is_array( $this->query_vars['path__not_in'] ) ) {
-			$this->sql_clauses['where']['path__not_in'] = "{$this->db->site}.path NOT IN ( '" . implode( "', '", $this->db->_escape( $this->query_vars['path__not_in'] ) ) . "' )";
+			$this->sql_clauses['where']['path__not_in'] = "$wpdb->site.path NOT IN ( '" . implode( "', '", $wpdb->_escape( $this->query_vars['path__not_in'] ) ) . "' )";
 		}
 
 		// Falsey search strings are ignored.
 		if ( strlen( $this->query_vars['search'] ) ) {
 			$this->sql_clauses['where']['search'] = $this->get_search_sql(
 				$this->query_vars['search'],
-				array( "{$this->db->site}.domain", "{$this->db->site}.path" )
+				array( "$wpdb->site.domain", "$wpdb->site.path" )
 			);
 		}
 
@@ -446,7 +433,7 @@ class WP_Network_Query {
 		}
 
 		$this->sql_clauses['select']  = "SELECT $found_rows $fields";
-		$this->sql_clauses['from']    = "FROM {$this->db->site} $join";
+		$this->sql_clauses['from']    = "FROM $wpdb->site $join";
 		$this->sql_clauses['groupby'] = $groupby;
 		$this->sql_clauses['orderby'] = $orderby;
 		$this->sql_clauses['limits']  = $limits;
@@ -454,10 +441,10 @@ class WP_Network_Query {
 		$this->request = "{$this->sql_clauses['select']} {$this->sql_clauses['from']} {$where} {$this->sql_clauses['groupby']} {$this->sql_clauses['orderby']} {$this->sql_clauses['limits']}";
 
 		if ( $this->query_vars['count'] ) {
-			return intval( $this->db->get_var( $this->request ) );
+			return intval( $wpdb->get_var( $this->request ) );
 		}
 
-		$network_ids = $this->db->get_col( $this->request );
+		$network_ids = $wpdb->get_col( $this->request );
 
 		return array_map( 'intval', $network_ids );
 	}
@@ -468,8 +455,12 @@ class WP_Network_Query {
 	 *
 	 * @since 4.6.0
 	 * @access private
+	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
 	 */
 	private function set_found_networks() {
+		global $wpdb;
+
 		if ( $this->query_vars['number'] && ! $this->query_vars['no_found_rows'] ) {
 			/**
 			 * Filters the query used to retrieve found network count.
@@ -481,7 +472,7 @@ class WP_Network_Query {
 			 */
 			$found_networks_query = apply_filters( 'found_networks_query', 'SELECT FOUND_ROWS()', $this );
 
-			$this->found_networks = (int) $this->db->get_var( $found_networks_query );
+			$this->found_networks = (int) $wpdb->get_var( $found_networks_query );
 		}
 	}
 
@@ -491,17 +482,21 @@ class WP_Network_Query {
 	 * @since 4.6.0
 	 * @access protected
 	 *
+	 * @global wpdb  $wpdb WordPress database abstraction object.
+	 *
 	 * @param string $string  Search string.
 	 * @param array  $columns Columns to search.
 	 *
 	 * @return string Search SQL.
 	 */
 	protected function get_search_sql( $string, $columns ) {
-		$like = '%' . $this->db->esc_like( $string ) . '%';
+		global $wpdb;
+
+		$like = '%' . $wpdb->esc_like( $string ) . '%';
 
 		$searches = array();
 		foreach ( $columns as $column ) {
-			$searches[] = $this->db->prepare( "$column LIKE %s", $like );
+			$searches[] = $wpdb->prepare( "$column LIKE %s", $like );
 		}
 
 		return '(' . implode( ' OR ', $searches ) . ')';
@@ -513,10 +508,14 @@ class WP_Network_Query {
 	 * @since 4.6.0
 	 * @access protected
 	 *
+	 * @global wpdb $wpdb WordPress database abstraction object.
+	 *
 	 * @param string $orderby Alias for the field to order by.
 	 * @return string|false Value to used in the ORDER clause. False otherwise.
 	 */
 	protected function parse_orderby( $orderby ) {
+		global $wpdb;
+
 		$allowed_keys = array(
 			'id',
 			'domain',
@@ -526,12 +525,12 @@ class WP_Network_Query {
 		$parsed = false;
 		if ( $orderby == 'network__in' ) {
 			$network__in = implode( ',', array_map( 'absint', $this->query_vars['network__in'] ) );
-			$parsed = "FIELD( {$this->db->site}.id, $network__in )";
+			$parsed = "FIELD( {$wpdb->site}.id, $network__in )";
 		} elseif ( $orderby == 'domain_length' || $orderby == 'path_length' ) {
 			$field = substr( $orderby, 0, -7 );
-			$parsed = "CHAR_LENGTH({$this->db->site}.$field)";
+			$parsed = "CHAR_LENGTH($wpdb->site.$field)";
 		} elseif ( in_array( $orderby, $allowed_keys ) ) {
-			$parsed = "{$this->db->site}.$orderby";
+			$parsed = "$wpdb->site.$orderby";
 		}
 
 		return $parsed;

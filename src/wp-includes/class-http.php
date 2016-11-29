@@ -300,7 +300,7 @@ class WP_Http {
 			'timeout' => $r['timeout'],
 			'useragent' => $r['user-agent'],
 			'blocking' => $r['blocking'],
-			'hooks' => new Requests_Hooks(),
+			'hooks' => new WP_HTTP_Requests_Hooks( $url, $r ),
 		);
 
 		// Ensure redirects follow browser behaviour.
@@ -328,6 +328,7 @@ class WP_Http {
 		// SSL certificate handling
 		if ( ! $r['sslverify'] ) {
 			$options['verify'] = false;
+			$options['verifyname'] = false;
 		} else {
 			$options['verify'] = $r['sslcertificates'];
 		}
@@ -358,8 +359,8 @@ class WP_Http {
 			}
 		}
 
-		// Work around a bug in Requests when the path starts with // See https://github.com/rmccue/Requests/issues/231
-		$url = preg_replace( '!^(\w+://[^/]+)//(.*)$!i', '$1/$2', $url );
+		// Avoid issues where mbstring.func_overload is enabled
+		mbstring_binary_safe_encoding();
 
 		try {
 			$requests_response = Requests::request( $url, $headers, $data, $type, $options );
@@ -374,6 +375,8 @@ class WP_Http {
 		catch ( Requests_Exception $e ) {
 			$response = new WP_Error( 'http_request_failed', $e->getMessage() );
 		}
+
+		reset_mbstring_encoding();
 
 		/**
 		 * Fires after an HTTP API response is received and before the response is returned.

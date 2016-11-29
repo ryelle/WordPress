@@ -32,18 +32,13 @@ class Tests_WP_Customize_Widgets extends WP_UnitTestCase {
 
 		unset( $GLOBALS['_wp_sidebars_widgets'] ); // clear out cache set by wp_get_sidebars_widgets()
 		$sidebars_widgets = wp_get_sidebars_widgets();
-		$this->assertEqualSets( array( 'wp_inactive_widgets', 'sidebar-1' ), array_keys( wp_get_sidebars_widgets() ) );
+		$this->assertEqualSets( array( 'wp_inactive_widgets', 'sidebar-1', 'sidebar-2', 'sidebar-3' ), array_keys( wp_get_sidebars_widgets() ) );
 		$this->assertContains( 'search-2', $sidebars_widgets['sidebar-1'] );
 		$this->assertContains( 'categories-2', $sidebars_widgets['sidebar-1'] );
 		$this->assertArrayHasKey( 2, get_option( 'widget_search' ) );
 		$widget_categories = get_option( 'widget_categories' );
 		$this->assertArrayHasKey( 2, $widget_categories );
 		$this->assertEquals( '', $widget_categories[2]['title'] );
-
-		// @todo We should not be including a theme anyway
-		remove_action( 'after_setup_theme', 'twentyfifteen_setup' );
-		remove_action( 'after_setup_theme', 'twentysixteen_setup' );
-		remove_action( 'customize_register', 'twentysixteen_customize_register', 11 );
 
 		$this->backup_registered_sidebars = $GLOBALS['wp_registered_sidebars'];
 

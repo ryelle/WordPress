@@ -2015,7 +2015,7 @@ function sanitize_url( $url, $protocols = null ) {
  *
  * @since 1.2.0
  * @deprecated 3.0.0 Use esc_url()
- * @see Alias for esc_url()
+ * @see esc_url()
  *
  * @param string $url The URL to be cleaned.
  * @param array $protocols Optional. An array of acceptable protocols.
@@ -3757,4 +3757,124 @@ function wp_embed_handler_googlevideo( $matches, $attr, $url, $rawattr ) {
 	_deprecated_function( __FUNCTION__, '4.6.0' );
 
 	return '';
+}
+
+/**
+ * Retrieve path of paged template in current or parent template.
+ *
+ * @since 1.5.0
+ * @deprecated 4.7.0 The paged.php template is no longer part of the theme template hierarchy.
+ *
+ * @return string Full path to paged template file.
+ */
+function get_paged_template() {
+	_deprecated_function( __FUNCTION__, '4.7.0' );
+
+	return get_query_template( 'paged' );
+}
+
+/**
+ * Removes the HTML JavaScript entities found in early versions of Netscape 4.
+ *
+ * Previously, this function was pulled in from the original
+ * import of kses and removed a specific vulnerability only
+ * existent in early version of Netscape 4. However, this
+ * vulnerability never affected any other browsers and can
+ * be considered safe for the modern web.
+ *
+ * The regular expression which sanitized this vulnerability
+ * has been removed in consideration of the performance and
+ * energy demands it placed, now merely passing through its
+ * input to the return.
+ *
+ * @since 1.0.0
+ * @deprecated deprecated since 4.7
+ *
+ * @param string $string
+ * @return string
+ */
+function wp_kses_js_entities( $string ) {
+	_deprecated_function( __FUNCTION__, '4.7.0' );
+
+	return preg_replace( '%&\s*\{[^}]*(\}\s*;?|$)%', '', $string );
+}
+
+/**
+ * Sort categories by ID.
+ *
+ * Used by usort() as a callback, should not be used directly. Can actually be
+ * used to sort any term object.
+ *
+ * @since 2.3.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @param object $a
+ * @param object $b
+ * @return int
+ */
+function _usort_terms_by_ID( $a, $b ) {
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	if ( $a->term_id > $b->term_id )
+		return 1;
+	elseif ( $a->term_id < $b->term_id )
+		return -1;
+	else
+		return 0;
+}
+
+/**
+ * Sort categories by name.
+ *
+ * Used by usort() as a callback, should not be used directly. Can actually be
+ * used to sort any term object.
+ *
+ * @since 2.3.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @param object $a
+ * @param object $b
+ * @return int
+ */
+function _usort_terms_by_name( $a, $b ) {
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	return strcmp( $a->name, $b->name );
+}
+
+/**
+ * Sort menu items by the desired key.
+ *
+ * @since 3.0.0
+ * @deprecated 4.7.0 Use wp_list_sort()
+ * @access private
+ *
+ * @global string $_menu_item_sort_prop
+ *
+ * @param object $a The first object to compare
+ * @param object $b The second object to compare
+ * @return int -1, 0, or 1 if $a is considered to be respectively less than, equal to, or greater than $b.
+ */
+function _sort_nav_menu_items( $a, $b ) {
+	global $_menu_item_sort_prop;
+
+	_deprecated_function( __FUNCTION__, '4.7.0', 'wp_list_sort' );
+
+	if ( empty( $_menu_item_sort_prop ) )
+		return 0;
+
+	if ( ! isset( $a->$_menu_item_sort_prop ) || ! isset( $b->$_menu_item_sort_prop ) )
+		return 0;
+
+	$_a = (int) $a->$_menu_item_sort_prop;
+	$_b = (int) $b->$_menu_item_sort_prop;
+
+	if ( $a->$_menu_item_sort_prop == $b->$_menu_item_sort_prop )
+		return 0;
+	elseif ( $_a == $a->$_menu_item_sort_prop && $_b == $b->$_menu_item_sort_prop )
+		return $_a < $_b ? -1 : 1;
+	else
+		return strcmp( $a->$_menu_item_sort_prop, $b->$_menu_item_sort_prop );
 }

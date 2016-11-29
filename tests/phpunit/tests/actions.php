@@ -9,7 +9,7 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function test_simple_action() {
 		$a = new MockAction();
-		$tag = 'test_action';
+		$tag = __FUNCTION__;
 
 		add_action($tag, array(&$a, 'action'));
 		do_action($tag);
@@ -26,7 +26,7 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function test_remove_action() {
 		$a = new MockAction();
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		add_action($tag, array(&$a, 'action'));
 		do_action($tag);
@@ -44,8 +44,8 @@ class Tests_Actions extends WP_UnitTestCase {
 	}
 
 	function test_has_action() {
-		$tag = rand_str();
-		$func = rand_str();
+		$tag = __FUNCTION__;
+		$func = __FUNCTION__ . '_func';
 
 		$this->assertFalse( has_action($tag, $func) );
 		$this->assertFalse( has_action($tag) );
@@ -61,7 +61,7 @@ class Tests_Actions extends WP_UnitTestCase {
 	function test_multiple_actions() {
 		$a1 = new MockAction();
 		$a2 = new MockAction();
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		// add both actions to the hook
 		add_action($tag, array(&$a1, 'action'));
@@ -76,8 +76,8 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function test_action_args_1() {
 		$a = new MockAction();
-		$tag = rand_str();
-		$val = rand_str();
+		$tag = __FUNCTION__;
+		$val = __FUNCTION__ . '_val';
 
 		add_action($tag, array(&$a, 'action'));
 		// call the action with a single argument
@@ -92,9 +92,9 @@ class Tests_Actions extends WP_UnitTestCase {
 	function test_action_args_2() {
 		$a1 = new MockAction();
 		$a2 = new MockAction();
-		$tag = rand_str();
-		$val1 = rand_str();
-		$val2 = rand_str();
+		$tag = __FUNCTION__;
+		$val1 = __FUNCTION__ . '_val1';
+		$val2 = __FUNCTION__ . '_val2';
 
 		// a1 accepts two arguments, a2 doesn't
 		add_action($tag, array(&$a1, 'action'), 10, 2);
@@ -114,9 +114,48 @@ class Tests_Actions extends WP_UnitTestCase {
 		$this->assertEquals( array( $val1 ), array_pop( $argsvar2 ) );
 	}
 
+	/**
+	 * Test that multiple callbacks receive the correct number of args even when the number
+	 * is less than, or greater than previous hooks.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/17817#comment:72
+	 * @ticket 17817
+	 */
+	function test_action_args_3() {
+		$a1 = new MockAction();
+		$a2 = new MockAction();
+		$a3 = new MockAction();
+		$tag = __FUNCTION__;
+		$val1 = __FUNCTION__ . '_val1';
+		$val2 = __FUNCTION__ . '_val2';
+
+		// a1 accepts two arguments, a2 doesn't, a3 accepts two arguments
+		add_action( $tag, array( &$a1, 'action' ), 10, 2 );
+		add_action( $tag, array( &$a2, 'action' ) );
+		add_action( $tag, array( &$a3, 'action' ), 10, 2 );
+		// call the action with two arguments
+		do_action( $tag, $val1, $val2 );
+
+		$call_count = $a1->get_call_count();
+		// a1 should be called with both args
+		$this->assertEquals( 1, $call_count );
+		$argsvar1 = $a1->get_args();
+		$this->assertEquals( array( $val1, $val2 ), array_pop( $argsvar1 ) );
+
+		// a2 should be called with one only
+		$this->assertEquals( 1, $a2->get_call_count() );
+		$argsvar2 = $a2->get_args();
+		$this->assertEquals( array( $val1 ), array_pop( $argsvar2 ) );
+
+		// a3 should be called with both args
+		$this->assertEquals( 1, $a3->get_call_count() );
+		$argsvar3 = $a3->get_args();
+		$this->assertEquals( array( $val1, $val2 ), array_pop( $argsvar3 ) );
+	}
+
 	function test_action_priority() {
 		$a = new MockAction();
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		add_action($tag, array(&$a, 'action'), 10);
 		add_action($tag, array(&$a, 'action2'), 9);
@@ -165,8 +204,8 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function test_all_action() {
 		$a = new MockAction();
-		$tag1 = rand_str();
-		$tag2 = rand_str();
+		$tag1 = __FUNCTION__ . '_1';
+		$tag2 = __FUNCTION__ . '_2';
 
 		// add an 'all' action
 		add_action('all', array(&$a, 'action'));
@@ -189,7 +228,7 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function test_remove_all_action() {
 		$a = new MockAction();
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		add_action('all', array(&$a, 'action'));
 		$this->assertEquals(10, has_filter('all', array(&$a, 'action')));
@@ -210,7 +249,7 @@ class Tests_Actions extends WP_UnitTestCase {
 	function test_action_ref_array() {
 		$obj = new stdClass();
 		$a = new MockAction();
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		add_action($tag, array(&$a, 'action'));
 
@@ -229,17 +268,17 @@ class Tests_Actions extends WP_UnitTestCase {
 	function test_action_keyed_array() {
 		$a = new MockAction();
 
-		$tag = rand_str();
+		$tag = __FUNCTION__;
 
 		add_action($tag, array(&$a, 'action'));
 
-		$context = array( rand_str() => rand_str() );
+		$context = array( 'key1' => 'val1' );
 		do_action($tag, $context);
 
 		$args = $a->get_args();
 		$this->assertSame($args[0][0], $context);
 
-		$context2 = array( rand_str() => rand_str(), rand_str() => rand_str() );
+		$context2 = array( 'key2' => 'val2', 'key3' => 'val3' );
 		do_action($tag, $context2);
 
 		$args = $a->get_args();
@@ -255,6 +294,120 @@ class Tests_Actions extends WP_UnitTestCase {
 
 	function action_self_removal() {
 		remove_action( 'test_action_self_removal', array( $this, 'action_self_removal' ) );
+	}
+
+	/**
+	 * @ticket 17817
+	 */
+	function test_action_recursion() {
+		$tag = __FUNCTION__;
+		$a = new MockAction();
+		$b = new MockAction();
+
+		add_action( $tag, array( $a, 'action' ), 11, 1 );
+		add_action( $tag, array( $b, 'action' ), 13, 1 );
+		add_action( $tag, array( $this, 'action_that_causes_recursion' ), 12, 1 );
+		do_action( $tag, $tag );
+
+		$this->assertEquals( 2, $a->get_call_count(), 'recursive actions should call all callbacks with earlier priority' );
+		$this->assertEquals( 2, $b->get_call_count(), 'recursive actions should call callbacks with later priority' );
+	}
+
+	function action_that_causes_recursion( $tag ) {
+		static $recursing = false;
+		if ( ! $recursing ) {
+			$recursing = true;
+			do_action( $tag, $tag );
+		}
+		$recursing = false;
+	}
+
+	/**
+	 * @ticket 9968
+	 * @ticket 17817
+	 */
+	function test_action_callback_manipulation_while_running() {
+		$tag = __FUNCTION__;
+		$a = new MockAction();
+		$b = new MockAction();
+		$c = new MockAction();
+		$d = new MockAction();
+		$e = new MockAction();
+
+		add_action( $tag, array( $a, 'action' ), 11, 2 );
+		add_action( $tag, array( $this, 'action_that_manipulates_a_running_hook' ), 12, 2 );
+		add_action( $tag, array( $b, 'action' ), 12, 2 );
+
+		do_action( $tag, $tag, array( $a, $b, $c, $d, $e ) );
+		do_action( $tag, $tag, array( $a, $b, $c, $d, $e ) );
+
+		$this->assertEquals( 2, $a->get_call_count(), 'callbacks should run unless otherwise instructed' );
+		$this->assertEquals( 1, $b->get_call_count(), 'callback removed by same priority callback should still get called' );
+		$this->assertEquals( 1, $c->get_call_count(), 'callback added by same priority callback should not get called' );
+		$this->assertEquals( 2, $d->get_call_count(), 'callback added by earlier priority callback should get called' );
+		$this->assertEquals( 1, $e->get_call_count(), 'callback added by later priority callback should not get called' );
+	}
+
+	function action_that_manipulates_a_running_hook( $tag, $mocks ) {
+		remove_action( $tag, array( $mocks[ 1 ], 'action' ), 12, 2 );
+		add_action( $tag, array( $mocks[ 2 ], 'action' ), 12, 2 );
+		add_action( $tag, array( $mocks[ 3 ], 'action' ), 13, 2 );
+		add_action( $tag, array( $mocks[ 4 ], 'action' ), 10, 2 );
+	}
+
+	/**
+	 * @ticket 17817
+	 *
+	 * This specificaly addresses the concern raised at
+	 * https://core.trac.wordpress.org/ticket/17817#comment:52
+	 */
+	function test_remove_anonymous_callback() {
+		$tag = __FUNCTION__;
+		$a = new MockAction();
+		add_action( $tag, array( $a, 'action' ), 12, 1 );
+		$this->assertTrue( has_action( $tag ) );
+
+		$hook = $GLOBALS['wp_filter'][ $tag ];
+
+		// From http://wordpress.stackexchange.com/a/57088/6445
+		foreach ( $hook as $priority => $filter ) {
+			foreach ( $filter as $identifier => $function ) {
+				if ( is_array( $function )
+					&& is_a( $function['function'][ 0 ], 'MockAction' )
+					&& 'action' === $function['function'][ 1 ]
+				) {
+					remove_filter(
+						$tag,
+						array( $function['function'][ 0 ], 'action' ),
+						$priority
+					);
+				}
+			}
+		}
+
+		$this->assertFalse( has_action( $tag ) );
+	}
+
+
+	/**
+	 * Test the ArrayAccess methods of WP_Hook
+	 *
+	 * @ticket 17817
+	 */
+	function test_array_access_of_wp_filter_global() {
+		global $wp_filter;
+		$tag = __FUNCTION__;
+
+		add_action( $tag, '__return_null', 11, 1 );
+
+		$this->assertTrue( isset( $wp_filter[ $tag ][ 11 ] ) );
+		$this->assertArrayHasKey( '__return_null', $wp_filter[ $tag ][ 11 ] );
+
+		unset( $wp_filter[ $tag ][ 11 ] );
+		$this->assertFalse( has_action( $tag, '__return_null' ) );
+
+		$wp_filter[ $tag ][ 11 ] = array( '__return_null' => array( 'function' => '__return_null', 'accepted_args' => 1 ) );
+		$this->assertEquals( 11, has_action( $tag, '__return_null' ) );
 	}
 
 	/**

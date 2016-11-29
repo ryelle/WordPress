@@ -314,7 +314,9 @@ module.exports = function(grunt) {
 					'twenty*/**/*.js',
 					'!twenty{eleven,twelve,thirteen}/**',
 					// Third party scripts
-					'!twenty{fourteen,fifteen,sixteen}/js/html5.js'
+					'!twenty{fourteen,fifteen,sixteen}/js/html5.js',
+					'!twentyseventeen/assets/js/html5.js',
+					'!twentyseventeen/assets/js/jquery.scrollTo.js'
 				]
 			},
 			media: {
@@ -440,15 +442,11 @@ module.exports = function(grunt) {
 				cmd: 'phpunit',
 				args: ['-c', 'phpunit.xml.dist', '--group', 'external-http']
 			}
-			//,
-			//'external-oembed': {
-			//	cmd: 'phpunit',
-			//	args: ['-c', 'phpunit.xml.dist', '--group', 'external-oembed']
-			//}
 		},
 		uglify: {
 			options: {
-				ASCIIOnly: true
+				ASCIIOnly: true,
+				screwIE8: false
 			},
 			core: {
 				expand: true,
@@ -684,6 +682,15 @@ module.exports = function(grunt) {
 		}
 	});
 
+	// Allow builds to be minimal
+	if( grunt.option( 'minimal-copy' ) ) {
+		var copyFilesOptions = grunt.config.get( 'copy.files.files' );
+		copyFilesOptions[0].src.push( '!wp-content/plugins/**' );
+		copyFilesOptions[0].src.push( '!wp-content/themes/!(twenty*)/**' );
+		grunt.config.set( 'copy.files.files', copyFilesOptions );
+	}
+
+
 	// Register tasks.
 
 	// RTL task.
@@ -870,6 +877,9 @@ module.exports = function(grunt) {
 
 	// Patch task.
 	grunt.renameTask('patch_wordpress', 'patch');
+
+	// Add an alias `apply` of the `patch` task name.
+	grunt.registerTask('apply', 'patch');
 
 	// Default task.
 	grunt.registerTask('default', ['build']);

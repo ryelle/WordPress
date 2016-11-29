@@ -286,6 +286,18 @@ class Tests_REST_Request extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $this->request->get_params() );
 	}
 
+	public function test_parameter_merging_with_numeric_keys() {
+		$this->request->set_query_params( array(
+			'1'           => 'hello',
+			'2'           => 'goodbye',
+		) );
+		$expected = array(
+			'1'           => 'hello',
+			'2'           => 'goodbye',
+		);
+		$this->assertEquals( $expected, $this->request->get_params() );
+	}
+
 	public function test_sanitize_params() {
 		$this->request->set_url_params( array(
 			'someinteger' => '123',
@@ -307,6 +319,27 @@ class Tests_REST_Request extends WP_UnitTestCase {
 
 		$this->assertEquals( 123, $this->request->get_param( 'someinteger' ) );
 		$this->assertEquals( 0, $this->request->get_param( 'somestring' ) );
+	}
+
+	public function test_sanitize_params_error() {
+		$this->request->set_url_params( array(
+			'successparam' => '123',
+			'failparam'    => '123',
+		));
+		$this->request->set_attributes( array(
+			'args' => array(
+				'successparam' => array(
+					'sanitize_callback' => 'absint',
+				),
+				'failparam' => array(
+					'sanitize_callback' => array( $this, '_return_wp_error_on_validate_callback' ),
+				),
+			),
+		));
+
+		$valid = $this->request->sanitize_params();
+		$this->assertWPError( $valid );
+		$this->assertEquals( 'rest_invalid_param', $valid->get_error_code() );
 	}
 
 	public function test_has_valid_params_required_flag() {
@@ -364,6 +397,21 @@ class Tests_REST_Request extends WP_UnitTestCase {
 
 		$this->assertWPError( $valid );
 		$this->assertEquals( 'rest_invalid_param', $valid->get_error_code() );
+	}
+
+	public function test_has_valid_params_json_error() {
+		if ( version_compare( PHP_VERSION, '5.3', '<' ) ) {
+			return $this->markTestSkipped( 'JSON validation is only available for PHP 5.3+' );
+		}
+
+		$this->request->set_header( 'Content-Type', 'application/json' );
+		$this->request->set_body( '{"invalid": JSON}' );
+
+		$valid = $this->request->has_valid_params();
+		$this->assertWPError( $valid );
+		$this->assertEquals( 'rest_invalid_json', $valid->get_error_code() );
+		$data = $valid->get_error_data();
+		$this->assertEquals( JSON_ERROR_SYNTAX, $data['json_error_code'] );
 	}
 
 	public function test_has_multiple_invalid_params_validate_callback() {

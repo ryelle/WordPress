@@ -271,16 +271,32 @@ NO;
 
 	/**
 	 * @ticket 31389
+	 * @ticket 18375
 	 */
 	public function test_get_page_template_slug_non_page() {
-		$post_id = self::factory()->post->create( array(
-			'post_type' => 'post',
-		) );
+		$post_id = self::factory()->post->create();
 
-		$this->assertFalse( get_page_template_slug( $post_id ) );
+		$this->assertEquals( '', get_page_template_slug( $post_id ) );
+
+		update_post_meta( $post_id, '_wp_page_template', 'default' );
+
+		$this->assertEquals( '', get_page_template_slug( $post_id ) );
+
+		update_post_meta( $post_id, '_wp_page_template', 'example.php' );
+		$this->assertEquals( 'example.php', get_page_template_slug( $post_id ) );
+	}
+
+	/**
+	 * @ticket 18375
+	 */
+	public function test_get_page_template_slug_non_page_from_loop() {
+		$post_id = self::factory()->post->create();
+
+		update_post_meta( $post_id, '_wp_page_template', 'example.php' );
 
 		$this->go_to( get_permalink( $post_id ) );
-		$this->assertFalse( get_page_template_slug() );
+
+		$this->assertEquals( 'example.php', get_page_template_slug() );
 	}
 
 	/**
@@ -299,6 +315,10 @@ NO;
 		// After falling back, the 'after' argument should be set and output as '</ul>'.
 		$this->assertRegExp( '/<\/ul><\/div>/', $menu );
 
+		// After falling back, the markup should include whitespace around <li>s
+		$this->assertRegExp( '/\s<li.*>|<\/li>\s/U', $menu );
+		$this->assertNotRegExp( '/><li.*>|<\/li></U', $menu );
+
 		// No menus + wp_nav_menu() falls back to wp_page_menu(), this time without a container.
 		$menu = wp_nav_menu( array(
 			'echo'      => false,
@@ -307,5 +327,16 @@ NO;
 
 		// After falling back, the empty 'container' argument should still return a container element.
 		$this->assertRegExp( '/<div class="menu">/', $menu );
+
+		// No menus + wp_nav_menu() falls back to wp_page_menu(), this time without white-space.
+		$menu = wp_nav_menu( array(
+			'echo'         => false,
+			'item_spacing' => 'discard',
+		) );
+
+		// After falling back, the markup should not include whitespace around <li>s
+		$this->assertNotRegExp( '/\s<li.*>|<\/li>\s/U', $menu );
+		$this->assertRegExp( '/><li.*>|<\/li></U', $menu );
+
 	}
 }

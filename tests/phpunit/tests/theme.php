@@ -10,20 +10,31 @@ class Tests_Theme extends WP_UnitTestCase {
 	protected $theme_name = 'Twenty Eleven';
 	protected $default_themes = array(
 		'twentyten', 'twentyeleven', 'twentytwelve', 'twentythirteen',
-		'twentyfourteen', 'twentyfifteen',
+		'twentyfourteen', 'twentyfifteen', 'twentysixteen', 'twentyseventeen',
 	);
 
 	function setUp() {
+		global $wp_theme_directories;
+
 		parent::setUp();
+
+		$backup_wp_theme_directories = $wp_theme_directories;
+		$wp_theme_directories = array( WP_CONTENT_DIR . '/themes' );
+
 		add_filter( 'extra_theme_headers', array( $this, '_theme_data_extra_headers' ) );
 		wp_clean_themes_cache();
 		unset( $GLOBALS['wp_themes'] );
 	}
 
 	function tearDown() {
+		global $wp_theme_directories;
+
+		$wp_theme_directories = $this->wp_theme_directories;
+
 		remove_filter( 'extra_theme_headers', array( $this, '_theme_data_extra_headers' ) );
 		wp_clean_themes_cache();
 		unset( $GLOBALS['wp_themes'] );
+
 		parent::tearDown();
 	}
 
@@ -176,15 +187,18 @@ class Tests_Theme extends WP_UnitTestCase {
 	 * @ticket 29925
 	 */
 	function test_default_theme_in_default_theme_list() {
-		$this->markTestSkipped( 'Core repository inclusion was stopped after Twenty Fifteen' );
-		if ( 'twenty' === substr( WP_DEFAULT_THEME, 0, 6 ) ) {
-			$this->assertContains( WP_DEFAULT_THEME, $this->default_themes );
+		$latest_default_theme = WP_Theme::get_core_default_theme();
+		if ( ! $latest_default_theme->exists() || 'twenty' !== substr( $latest_default_theme->get_stylesheet(), 0, 6 ) ) {
+			$this->markTestSkipped( 'No Twenty* series default themes are installed' ); 
 		}
+		$this->assertContains( $latest_default_theme->get_stylesheet(), $this->default_themes );
 	}
 
 	function test_default_themes_have_textdomain() {
 		foreach ( $this->default_themes as $theme ) {
-			$this->assertEquals( $theme, wp_get_theme( $theme )->get( 'TextDomain' ) );
+			if ( wp_get_theme( $theme )->exists() ) {
+				$this->assertEquals( $theme, wp_get_theme( $theme )->get( 'TextDomain' ) );
+			}
 		}
 	}
 
@@ -196,7 +210,7 @@ class Tests_Theme extends WP_UnitTestCase {
 		$wp_theme = wp_get_theme( $this->theme_slug );
 		$this->assertNotEmpty( $wp_theme->get('License') );
 		$path_to_style_css = $wp_theme->get_theme_root() . '/' . $wp_theme->get_stylesheet() . '/style.css';
-		$this->assertTrue( file_exists( $path_to_style_css ) );
+		$this->assertFileExists( $path_to_style_css );
 		$theme_data = get_theme_data( $path_to_style_css );
 		$this->assertArrayHasKey( 'License', $theme_data );
 		$this->assertArrayNotHasKey( 'Not a Valid Key', $theme_data );
@@ -267,7 +281,6 @@ class Tests_Theme extends WP_UnitTestCase {
 				$this->assertEquals(get_date_template(), get_query_template('date'));
 				$this->assertEquals(get_home_template(), get_query_template('home', array('home.php','index.php')));
 				$this->assertEquals(get_page_template(), get_query_template('page'));
-				$this->assertEquals(get_paged_template(), get_query_template('paged'));
 				$this->assertEquals(get_search_template(), get_query_template('search'));
 				$this->assertEquals(get_single_template(), get_query_template('single'));
 				$this->assertEquals(get_attachment_template(), get_query_template('attachment'));

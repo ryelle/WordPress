@@ -36,8 +36,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = '' ) {
 	// Don't index any of these forms
 	add_action( 'login_head', 'wp_no_robots' );
 
-	if ( wp_is_mobile() )
-		add_action( 'login_head', 'wp_login_viewport_meta' );
+	add_action( 'login_head', 'wp_login_viewport_meta' );
 
 	if ( empty($wp_error) )
 		$wp_error = new WP_Error();
@@ -99,7 +98,7 @@ function login_header( $title = 'Log In', $message = '', $wp_error = '' ) {
 
 	if ( is_multisite() ) {
 		$login_header_url   = network_home_url();
-		$login_header_title = get_current_site()->site_name;
+		$login_header_title = get_network()->site_name;
 	} else {
 		$login_header_url   = __( 'https://wordpress.org/' );
 		$login_header_title = __( 'Powered by WordPress' );
@@ -124,8 +123,6 @@ function login_header( $title = 'Log In', $message = '', $wp_error = '' ) {
 	$login_header_title = apply_filters( 'login_headertitle', $login_header_title );
 
 	$classes = array( 'login-action-' . $action, 'wp-core-ui' );
-	if ( wp_is_mobile() )
-		$classes[] = 'mobile';
 	if ( is_rtl() )
 		$classes[] = 'rtl';
 	if ( $interim_login ) {
@@ -260,8 +257,6 @@ function login_footer($input_id = '') {
  * @since 3.0.0
  */
 function wp_shake_js() {
-	if ( wp_is_mobile() )
-		return;
 ?>
 <script type="text/javascript">
 addLoadEvent = function(func){if(typeof jQuery!="undefined")jQuery(document).ready(func);else if(typeof wpOnload!='function'){wpOnload=func;}else{var oldonload=wpOnload;wpOnload=function(){oldonload();func();}}};
@@ -337,7 +332,7 @@ function retrieve_password() {
 	$message .= '<' . network_site_url("wp-login.php?action=rp&key=$key&login=" . rawurlencode($user_login), 'login') . ">\r\n";
 
 	if ( is_multisite() ) {
-		$blogname = get_current_site()->site_name;
+		$blogname = get_network()->site_name;
 	} else {
 		/*
 		 * The blogname option is escaped with esc_html on the way into the database
@@ -346,6 +341,7 @@ function retrieve_password() {
 		$blogname = wp_specialchars_decode(get_option('blogname'), ENT_QUOTES);
 	}
 
+	/* translators: Password reset email subject. 1: Site name */
 	$title = sprintf( __('[%s] Password Reset'), $blogname );
 
 	/**
@@ -792,10 +788,12 @@ default:
 
 	if ( empty( $_COOKIE[ LOGGED_IN_COOKIE ] ) ) {
 		if ( headers_sent() ) {
+			/* translators: 1: Browser cookie documentation URL, 2: Support forums URL */
 			$user = new WP_Error( 'test_cookie', sprintf( __( '<strong>ERROR</strong>: Cookies are blocked due to unexpected output. For help, please see <a href="%1$s">this documentation</a> or try the <a href="%2$s">support forums</a>.' ),
 				__( 'https://codex.wordpress.org/Cookies' ), __( 'https://wordpress.org/support/' ) ) );
 		} elseif ( isset( $_POST['testcookie'] ) && empty( $_COOKIE[ TEST_COOKIE ] ) ) {
 			// If cookies are disabled we can't log in even with a valid user+pass
+			/* translators: 1: Browser cookie documentation URL */
 			$user = new WP_Error( 'test_cookie', sprintf( __( '<strong>ERROR</strong>: Cookies are blocked or not supported by your browser. You must <a href="%s">enable cookies</a> to use WordPress.' ),
 				__( 'https://codex.wordpress.org/Cookies' ) ) );
 		}

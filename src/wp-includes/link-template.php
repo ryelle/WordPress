@@ -58,8 +58,8 @@ function user_trailingslashit($string, $type_of_url = '') {
 	 *
 	 * @param string $string      URL with or without a trailing slash.
 	 * @param string $type_of_url The type of URL being considered. Accepts 'single', 'single_trackback',
-	 *                            'single_feed', 'single_paged', 'feed', 'category', 'page', 'year',
-	 *                            'month', 'day', 'paged', 'post_type_archive'.
+	 *                            'single_feed', 'single_paged', 'commentpaged', 'paged', 'home', 'feed',
+	 *                            'category', 'page', 'year', 'month', 'day', 'post_type_archive'.
 	 */
 	return apply_filters( 'user_trailingslashit', $string, $type_of_url );
 }
@@ -169,7 +169,9 @@ function get_permalink( $post = 0, $leavename = false ) {
 		if ( strpos($permalink, '%category%') !== false ) {
 			$cats = get_the_category($post->ID);
 			if ( $cats ) {
-				usort($cats, '_usort_terms_by_ID'); // order by ID
+				$cats = wp_list_sort( $cats, array(
+					'term_id' => 'ASC',
+				) );
 
 				/**
 				 * Filters the category that gets used in the %category% permalink token.
@@ -930,7 +932,7 @@ function get_edit_term_link( $term_id, $taxonomy = '', $object_type = '' ) {
 	}
 
 	$tax = get_taxonomy( $term->taxonomy );
-	if ( ! $tax || ! current_user_can( $tax->cap->edit_terms ) ) {
+	if ( ! $tax || ! current_user_can( 'edit_term', $term->term_id ) ) {
 		return;
 	}
 
@@ -984,8 +986,9 @@ function edit_term_link( $link = '', $before = '', $after = '', $term = null, $e
 		return;
 
 	$tax = get_taxonomy( $term->taxonomy );
-	if ( ! current_user_can( $tax->cap->edit_terms ) )
+	if ( ! current_user_can( 'edit_term', $term->term_id ) ) {
 		return;
+	}
 
 	if ( empty( $link ) )
 		$link = __('Edit This');
@@ -2528,8 +2531,8 @@ function get_the_posts_pagination( $args = array() ) {
 	if ( $GLOBALS['wp_query']->max_num_pages > 1 ) {
 		$args = wp_parse_args( $args, array(
 			'mid_size'           => 1,
-			'prev_text'          => _x( 'Previous', 'previous post' ),
-			'next_text'          => _x( 'Next', 'next post' ),
+			'prev_text'          => _x( 'Previous', 'previous set of posts' ),
+			'next_text'          => _x( 'Next', 'next set of posts' ),
 			'screen_reader_text' => __( 'Posts navigation' ),
 		) );
 
@@ -2951,9 +2954,9 @@ function get_shortcut_link() {
 /**
  * Retrieves the URL for the current site where the front end is accessible.
  *
- * Returns the 'home' option with the appropriate protocol, 'https' if
- * is_ssl() and 'http' otherwise. If `$scheme` is 'http' or 'https',
- * `is_ssl()` is overridden.
+ * Returns the 'home' option with the appropriate protocol. The protocol will be 'https'
+ * if is_ssl() evaluates to true; otherwise, it will be the same as the 'home' option.
+ * If `$scheme` is 'http' or 'https', is_ssl() is overridden.
  *
  * @since 3.0.0
  *
@@ -2969,9 +2972,9 @@ function home_url( $path = '', $scheme = null ) {
 /**
  * Retrieves the URL for a given site where the front end is accessible.
  *
- * Returns the 'home' option with the appropriate protocol, 'https' if
- * is_ssl() and 'http' otherwise. If `$scheme` is 'http' or 'https',
- * `is_ssl()` is overridden.
+ * Returns the 'home' option with the appropriate protocol. The protocol will be 'https'
+ * if is_ssl() evaluates to true; otherwise, it will be the same as the 'home' option.
+ * If `$scheme` is 'http' or 'https', is_ssl() is overridden.
  *
  * @since 3.0.0
  *
@@ -3254,17 +3257,15 @@ function network_site_url( $path = '', $scheme = null ) {
 	if ( ! is_multisite() )
 		return site_url($path, $scheme);
 
-	$current_site = get_current_site();
+	$current_network = get_network();
 
-	if ( 'relative' == $scheme ) {
-		$url = $current_site->path;
-	} else {
-		$url = set_url_scheme( 'http://' . $current_site->domain . $current_site->path, $scheme );
-	}
+	if ( 'relative' == $scheme )
+		$url = $current_network->path;
+	else
+		$url = set_url_scheme( 'http://' . $current_network->domain . $current_network->path, $scheme );
 
-	if ( $path && is_string( $path ) ) {
+	if ( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
-	}
 
 	/**
 	 * Filters the network site URL.
@@ -3298,21 +3299,19 @@ function network_home_url( $path = '', $scheme = null ) {
 	if ( ! is_multisite() )
 		return home_url($path, $scheme);
 
-	$current_site = get_current_site();
+	$current_network = get_network();
 	$orig_scheme = $scheme;
 
 	if ( ! in_array( $scheme, array( 'http', 'https', 'relative' ) ) )
 		$scheme = is_ssl() && ! is_admin() ? 'https' : 'http';
 
-	if ( 'relative' == $scheme ) {
-		$url = $current_site->path;
-	} else {
-		$url = set_url_scheme( 'http://' . $current_site->domain . $current_site->path, $scheme );
-	}
+	if ( 'relative' == $scheme )
+		$url = $current_network->path;
+	else
+		$url = set_url_scheme( 'http://' . $current_network->domain . $current_network->path, $scheme );
 
-	if ( $path && is_string( $path ) ) {
+	if ( $path && is_string( $path ) )
 		$url .= ltrim( $path, '/' );
-	}
 
 	/**
 	 * Filters the network home URL.
@@ -4022,4 +4021,126 @@ function get_avatar_data( $id_or_email, $args = null ) {
 	 *                            user email, WP_User object, WP_Post object, or WP_Comment object.
 	 */
 	return apply_filters( 'get_avatar_data', $args, $id_or_email );
+}
+
+/**
+ * Retrieves the URL of a file in the theme.
+ *
+ * Searches in the stylesheet directory before the template directory so themes
+ * which inherit from a parent theme can just override one file.
+ *
+ * @since 4.7.0
+ *
+ * @param string $file Optional. File to search for in the stylesheet directory.
+ * @return string The URL of the file.
+ */
+function get_theme_file_uri( $file = '' ) {
+	$file = ltrim( $file, '/' );
+
+	if ( empty( $file ) ) {
+		$url = get_stylesheet_directory_uri();
+	} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+		$url = get_stylesheet_directory_uri() . '/' . $file;
+	} else {
+		$url = get_template_directory_uri() . '/' . $file;
+	}
+
+	/**
+	 * Filters the URL to a file in the theme.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param string $url  The file URL.
+	 * @param string $file The requested file to search for.
+	 */
+	return apply_filters( 'theme_file_uri', $url, $file );
+}
+
+/**
+ * Retrieves the URL of a file in the parent theme.
+ *
+ * @since 4.7.0
+ *
+ * @param string $file Optional. File to return the URL for in the template directory.
+ * @return string The URL of the file.
+ */
+function get_parent_theme_file_uri( $file = '' ) {
+	$file = ltrim( $file, '/' );
+
+	if ( empty( $file ) ) {
+		$url = get_template_directory_uri();
+	} else {
+		$url = get_template_directory_uri() . '/' . $file;
+	}
+
+	/**
+	 * Filters the URL to a file in the parent theme.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param string $url  The file URL.
+	 * @param string $file The requested file to search for.
+	 */
+	return apply_filters( 'parent_theme_file_uri', $url, $file );
+}
+
+/**
+ * Retrieves the path of a file in the theme.
+ *
+ * Searches in the stylesheet directory before the template directory so themes
+ * which inherit from a parent theme can just override one file.
+ *
+ * @since 4.7.0
+ *
+ * @param string $file Optional. File to search for in the stylesheet directory.
+ * @return string The path of the file.
+ */
+function get_theme_file_path( $file = '' ) {
+	$file = ltrim( $file, '/' );
+
+	if ( empty( $file ) ) {
+		$path = get_stylesheet_directory();
+	} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
+		$path = get_stylesheet_directory() . '/' . $file;
+	} else {
+		$path = get_template_directory() . '/' . $file;
+	}
+
+	/**
+	 * Filters the path to a file in the theme.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param string $path The file path.
+	 * @param string $file The requested file to search for.
+	 */
+	return apply_filters( 'theme_file_path', $path, $file );
+}
+
+/**
+ * Retrieves the path of a file in the parent theme.
+ *
+ * @since 4.7.0
+ *
+ * @param string $file Optional. File to return the path for in the template directory.
+ * @return string The path of the file.
+ */
+function get_parent_theme_file_path( $file = '' ) {
+	$file = ltrim( $file, '/' );
+
+	if ( empty( $file ) ) {
+		$path = get_template_directory();
+	} else {
+		$path = get_template_directory() . '/' . $file;
+	}
+
+	/**
+	 * Filters the path to a file in the parent theme.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @param string $path The file path.
+	 * @param string $file The requested file to search for.
+	 */
+	return apply_filters( 'parent_theme_file_path', $path, $file );
 }
