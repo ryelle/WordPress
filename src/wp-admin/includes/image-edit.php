@@ -182,14 +182,14 @@ function wp_image_editor($post_id, $msg = false) {
 	<div class="imgedit-panel-content wp-clearfix">
 		<?php echo $note; ?>
 		<div class="imgedit-menu wp-clearfix">
-			<button type="button" onclick="imageEdit.crop(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-crop button disabled" disabled><span class="screen-reader-text"><?php esc_html_e( 'Crop' ); ?></span></button><?php
+			<button type="button" onclick="imageEdit.crop(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-crop button disabled" disabled><?php echo wp_icon( 'dashicons-image-crop', array( 'title' => __( 'Crop' ) ) ); ?></button><?php
 
 		// On some setups GD library does not provide imagerotate() - Ticket #11536
 		if ( wp_image_editor_supports( array( 'mime_type' => get_post_mime_type( $post_id ), 'methods' => array( 'rotate' ) ) ) ) {
 			$note_no_rotate = '';
 	?>
-			<button type="button" class="imgedit-rleft button" onclick="imageEdit.rotate( 90, <?php echo "$post_id, '$nonce'"; ?>, this)"><span class="screen-reader-text"><?php esc_html_e( 'Rotate counter-clockwise' ); ?></span></button>
-			<button type="button" class="imgedit-rright button" onclick="imageEdit.rotate(-90, <?php echo "$post_id, '$nonce'"; ?>, this)"><span class="screen-reader-text"><?php esc_html_e( 'Rotate clockwise' ); ?></span></button>
+			<button type="button" class="imgedit-rleft button" onclick="imageEdit.rotate( 90, <?php echo "$post_id, '$nonce'"; ?>, this)"><?php echo wp_icon( 'dashicons-image-rotate-left', array( 'title' => __( 'Rotate counter-clockwise' ) ) ); ?></button>
+			<button type="button" class="imgedit-rright button" onclick="imageEdit.rotate(-90, <?php echo "$post_id, '$nonce'"; ?>, this)"><?php echo wp_icon( 'dashicons-image-rotate-right', array( 'title' => __( 'Rotate clockwise' ) ) ); ?></button>
 	<?php } else {
 			$note_no_rotate = '<p class="note-no-rotate"><em>' . __( 'Image rotation is not supported by your web host.' ) . '</em></p>';
 	?>
@@ -197,11 +197,11 @@ function wp_image_editor($post_id, $msg = false) {
 			<button type="button" class="imgedit-rright button disabled" disabled></button>
 	<?php } ?>
 
-			<button type="button" onclick="imageEdit.flip(1, <?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-flipv button"><span class="screen-reader-text"><?php esc_html_e( 'Flip vertically' ); ?></span></button>
-			<button type="button" onclick="imageEdit.flip(2, <?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-fliph button"><span class="screen-reader-text"><?php esc_html_e( 'Flip horizontally' ); ?></span></button>
+			<button type="button" onclick="imageEdit.flip(1, <?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-flipv button"><?php echo wp_icon( 'dashicons-image-flip-vertical', array( 'title' => __( 'Flip vertically' ) ) ); ?></button>
+			<button type="button" onclick="imageEdit.flip(2, <?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-fliph button"><?php echo wp_icon( 'dashicons-image-flip-horizontal', array( 'title' => __( 'Flip horizontally' ) ) ); ?></button>
 
-			<button type="button" id="image-undo-<?php echo $post_id; ?>" onclick="imageEdit.undo(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-undo button disabled" disabled><span class="screen-reader-text"><?php esc_html_e( 'Undo' ); ?></span></button>
-			<button type="button" id="image-redo-<?php echo $post_id; ?>" onclick="imageEdit.redo(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-redo button disabled" disabled><span class="screen-reader-text"><?php esc_html_e( 'Redo' ); ?></span></button>
+			<button type="button" id="image-undo-<?php echo $post_id; ?>" onclick="imageEdit.undo(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-undo button disabled" disabled><?php echo wp_icon( 'dashicons-undo', array( 'title' => __( 'Undo' ) ) ); ?></button>
+			<button type="button" id="image-redo-<?php echo $post_id; ?>" onclick="imageEdit.redo(<?php echo "$post_id, '$nonce'"; ?>, this)" class="imgedit-redo button disabled" disabled><?php echo wp_icon( 'dashicons-redo', array( 'title' => __( 'Redo' ) ) ); ?></button>
 			<?php echo $note_no_rotate; ?>
 		</div>
 
