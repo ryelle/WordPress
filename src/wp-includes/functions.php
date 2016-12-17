@@ -5594,23 +5594,90 @@ function wp_cache_get_last_changed( $group ) {
 }
 
 /**
- * Display an SVG icon from the master SVG sprite.
- *
- * @param string $icon  Name of the icon to show.
- * @param array  $attrs Possible attributes for the SVG element.
- * @return string SVG code to display the selected icon
+ * Add SVG definitions to the footer.
  */
-function wp_icon( $icon, $attrs = array() ) {
-	$defaults = array(
-		'title' => false,
-	);
-	$attrs = wp_parse_args( $attrs, $defaults );
+function wp_include_svg_icons() {
+	// Define SVG sprite file.
+	$svg_icons = dirname( __FILE__ ) . '/icons/dashicons.svg';
 
-	$sprite_url = '/wp-includes/icons/dashicons.svg';
-	return sprintf(
-		'<svg class="dashicon" %1$s>%2$s <use xlink:href="%3$s" /> </svg>',
-		$attrs['title'] ? '' : 'aria-hidden="true"',
-		$attrs['title'] ? '<title>' . $attrs['title'] . '</title>' : '',
-		esc_url( $sprite_url . '#' . $icon )
+	// If it exists, include it.
+	if ( file_exists( $svg_icons ) ) {
+		require_once( $svg_icons );
+	}
+}
+
+/**
+ * Return SVG markup.
+ *
+ * @param string $icon  Required SVG icon filename.
+ * @param array $args {
+ *     Parameters needed to display an SVG.
+ *
+ *     @type string $title Optional SVG title.
+ *     @type string $desc  Optional SVG description.
+ * }
+ * @return string SVG markup.
+ */
+function wp_icon( $icon, $args = array() ) {
+	// Define an icon.
+	if ( ! $icon ) {
+		return __( 'Please define an SVG icon filename.' );
+	}
+
+	// Set defaults.
+	$defaults = array(
+		'title'       => '',
+		'desc'        => '',
+		'fallback'    => false,
 	);
+
+	// Parse args.
+	$args = wp_parse_args( $args, $defaults );
+
+	// Set aria hidden.
+	$aria_hidden = ' aria-hidden="true"';
+
+	// Set ARIA.
+	$aria_labelledby = '';
+
+	if ( $args['title'] ) {
+		$aria_hidden     = '';
+		$unique_id       = uniqid();
+		$aria_labelledby = ' aria-labelledby="title-' . $unique_id . '"';
+
+		if ( $args['desc'] ) {
+			$aria_labelledby = ' aria-labelledby="title-' . $unique_id . ' desc-' . $unique_id . '"';
+		}
+	}
+
+	// Begin SVG markup.
+	$svg = '<svg class="dashicon dashicon-' . esc_attr( $icon ) . '"' . $aria_hidden . $aria_labelledby . ' role="img">';
+
+	// Display the title.
+	if ( $args['title'] ) {
+		$svg .= '<title id="title-' . $unique_id . '">' . esc_html( $args['title'] ) . '</title>';
+
+		// Display the desc only if the title is already set.
+		if ( $args['desc'] ) {
+			$svg .= '<desc id="desc-' . $unique_id . '">' . esc_html( $args['desc'] ) . '</desc>';
+		}
+	}
+
+	/*
+	 * Display the icon.
+	 *
+	 * The whitespace around `<use>` is intentional - it is a work around to a keyboard navigation bug in Safari 10.
+	 *
+	 * See https://core.trac.wordpress.org/ticket/38387.
+	 */
+	$svg .= ' <use href="#' . esc_html( $icon ) . '" xlink:href="#' . esc_html( $icon ) . '"></use> ';
+
+	// Add some markup to use as a fallback for browsers that do not support SVGs.
+	if ( $args['fallback'] ) {
+		$svg .= '<span class="svg-fallback dashicons-' . esc_attr( $icon ) . '"></span>';
+	}
+
+	$svg .= '</svg>';
+
+	return $svg;
 }

@@ -465,6 +465,10 @@ add_action( 'activate_header', '_wp_admin_bar_init' );
 add_action( 'wp_footer', 'wp_admin_bar_render', 1000 );
 add_action( 'in_admin_header', 'wp_admin_bar_render', 0 );
 
+// Add SVGs
+add_action( 'wp_footer', 'wp_include_svg_icons', 9999 );
+add_action( 'admin_footer', 'wp_include_svg_icons', 9999 );
+
 // Former admin filters that can also be hooked on the front end
 add_action( 'media_buttons', 'media_buttons' );
 add_filter( 'image_send_to_editor', 'image_add_caption', 20, 8 );
