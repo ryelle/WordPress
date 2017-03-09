@@ -115,10 +115,6 @@ module.exports = function(grunt) {
 					{
 						src: SOURCE_DIR + 'wp-admin/css/wp-admin.css',
 						dest: BUILD_DIR + 'wp-admin/css/wp-admin.min.css'
-					},
-					{
-						src:  BUILD_DIR + 'wp-admin/css/wp-admin-rtl.css',
-						dest: BUILD_DIR + 'wp-admin/css/wp-admin-rtl.min.css'
 					}
 				]
 			},
@@ -650,7 +646,7 @@ module.exports = function(grunt) {
 				tasks: ['clean:dynamic', 'copy:dynamic'],
 				options: {
 					dot: true,
-					spawn: false,
+// 					spawn: false,
 					interval: 2000
 				}
 			},
@@ -668,9 +664,17 @@ module.exports = function(grunt) {
 				],
 				tasks: ['rtlcss:dynamic'],
 				options: {
-					spawn: false,
+// 					spawn: false,
 					interval: 2000
 				}
+			},
+			cssmin:  {
+				files: [
+					SOURCE_DIR + 'wp-admin/css/*.css',
+					SOURCE_DIR + 'wp-includes/css/*.css'
+				],
+				tasks: ['cssmin:core'],
+			
 			},
 			test: {
 				files: [

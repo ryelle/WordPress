@@ -860,6 +860,7 @@ function wp_admin_bar_search_menu( $wp_admin_bar ) {
 		return;
 
 	$form  = '<form action="' . esc_url( home_url( '/' ) ) . '" method="get" id="adminbarsearch">';
+	$form .=  wp_icon( 'dashicons-search' );
 	$form .= '<input class="adminbar-input" name="s" id="adminbar-search" type="text" value="" maxlength="150" />';
 	$form .= '<label for="adminbar-search" class="screen-reader-text">' . __( 'Search' ) . '</label>';
 	$form .= '<input type="submit" class="adminbar-button" value="' . __('Search') . '"/>';
