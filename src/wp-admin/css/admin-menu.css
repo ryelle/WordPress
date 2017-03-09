@@ -353,6 +353,11 @@
 	height: 34px;
 	margin: 0;
 	text-align: center;
+	line-height: 32px;
+}
+
+#adminmenu .dashicon {
+	vertical-align: middle;
 }
 
 #adminmenu div.wp-menu-image.svg {
@@ -421,6 +426,7 @@ div.wp-menu-image:before {
 	height: 30px;
 	position: absolute;
 	z-index: 25;
+	line-height: 29px;
 }
 
 .folded #adminmenu a.menu-top {
